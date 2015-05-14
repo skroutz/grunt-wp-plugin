@@ -1,4 +1,4 @@
-# grunt-wp-svn [![Build Status](https://travis-ci.org/axisthemes/grunt-wp-svn.svg?branch=master)](https://travis-ci.org/axisthemes/grunt-wp-svn)
+# grunt-wp-svn
 
 > Grunt plug-in to deploy a project directory to WordPress SVN repo.
 
