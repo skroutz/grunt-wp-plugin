@@ -1,0 +1,51 @@
+{
+  "name": "grunt-wp-svn",
+  "description": "Grunt plug-in to deploy a project directory to WordPress SVN repo.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/axisthemes/grunt-wp-svn",
+  "author": {
+    "name": "AxisThemes",
+    "email": "axisthemes@gmail.com",
+    "url": "http://axisthemes.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/axisthemes/grunt-wp-svn.git"
+  },
+  "bugs": {
+    "url": "https://github.com/axisthemes/grunt-wp-svn/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/axisthemes/grunt-wp-svn/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "Gruntfile.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "inquirer": "^0.8.4",
+    "shelljs": "^0.4.0"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt": "^0.4.5"
+  },
+  "peerDependencies": {
+    "grunt": "^0.4.5"
+  },
+  "keywords": [
+    "gruntplugin",
+    "wordpress",
+    "deploy",
+    "git",
+    "svn"
+  ]
+}
