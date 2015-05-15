@@ -1,5 +1,5 @@
 /*
- * grunt-potomo
+ * grunt-wp-svn
  * https://github.com/axisthemes/grunt-wp-svn
  *
  * Copyright (c) 2014 AxisThemes
@@ -8,11 +8,11 @@
 
 'use strict';
 
-var shell = require( 'shelljs' );
+var shell = require( 'shelljs' ), inquirer = require( 'inquirer' );
 
 module.exports = function( grunt ) {
 
-	grunt.registerMultiTask( 'potomo', 'Deploy project directory to WordPress SVN repo.', function() {
+	grunt.registerMultiTask( 'wpsvn', 'Deploy a project directory to WordPress SVN repo.', function() {
 
 	});
 };
