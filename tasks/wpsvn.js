@@ -101,7 +101,9 @@ module.exports = function( grunt ) {
 			return false;
 		}
 
-		var a = a.split( '.' ),	b = b.split( '.' );
+		a = a.split( '.' );
+		b = b.split( '.' );
+
 		for ( var i = 0; i < Math.max( a.length, b.length ); i++ ) {
 			if ( ( a[i] && ! b[i] && parseInt( a[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) > parseInt( b[i], 10 ) ) ) {
 				return 1;
