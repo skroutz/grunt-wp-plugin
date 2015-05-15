@@ -33,10 +33,9 @@ module.exports = function(grunt) {
 		// Configuration to be run (and then tested).
 		wpsvn: {
 			options: {
-				assets_dir: 'assets',
-				deploy_dir: 'deploy',
-				svn_username: 'shivapoudel',
-				svn_repository: 'https://svn2.sliksvn.com/axisthemes_deploy/'
+				svn_user: 'axisthemes',
+				build_dir: 'deploy',
+				assets_dir: 'deploy/assets',
 			},
 			plugin: {
 				options: {
