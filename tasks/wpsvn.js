@@ -50,23 +50,23 @@ module.exports = function( grunt ) {
 
 			// Set up slug, main file, readme file and paths.
 			var slug        = options.plugin_slug;
-			var svnpath     = './tmp/' + slug;
+			var svnpath     = '/tmp/' + slug;
 			var deploy_path = options.deploy_dir.replace( /\/?$/, '/' ); // trailingslash
 			var plugin_file = deploy_path + slug + '.php';
 			var readme_file = deploy_path + 'readme.txt';
 
-			// SVN User and Repository URL
-			var svnuser = options.svn_username || answers.svn_username;
-			var svnrepo = options.svn_repository.replace( '{plugin-slug}', slug );
+			// SVN User and Repository URI
+			var svnuser = options.svn_user || answers.svn_username;
+			var svnrepo = options.svn_repo.replace( '{plugin-slug}', slug );
 
-			// Try to find readme.txt
+			// Try to find Readme file
 			if ( ! grunt.file.exists( readme_file ) ) {
-				grunt.fail.warn( 'readme.txt file not found at ' + readme_file );
+				grunt.fail.warn( 'Readme file "' + readme_file + '" not found.' );
 			}
 
-			// Try to find main plug-in file
+			// Try to find plug-in file
 			if ( ! grunt.file.exists( plugin_file ) ) {
-				grunt.fail.warn( 'Main' + plugin_file + 'file not found.' );
+				grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
 			}
 
 			// Get Versions:
@@ -89,8 +89,8 @@ module.exports = function( grunt ) {
 			// Clean temp
 			cmd = ( 'rm -fr ' + svnpath );
 
-			// Subversion checkout
-			grunt.log.writeln( 'Subversion checkout...' );
+			// Checkout SVN repository
+			grunt.log.writeln( 'Checking out: ' + svnrepo.cyan );
 
 		});
 	});
