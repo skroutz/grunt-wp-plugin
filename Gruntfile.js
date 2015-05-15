@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 			options: {
 				svn_user: 'axisthemes',
 				deploy_dir: 'deploy',
-				assets_dir: 'deploy/assets',
+				assets_dir: 'deploy/assets'
 			},
 			plugin: {
 				options: {

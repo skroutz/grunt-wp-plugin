@@ -101,6 +101,18 @@ module.exports = function( grunt ) {
 				}
 
 				grunt.log.writeln( 'Subversion checkout done.' );
+
+				if ( grunt.file.exists( svnpath + '/tags/' + version ) ) {
+					grunt.fail.warn( 'Tag ' + version + ' already exists.' );
+				}
+
+				// Clean trunk
+				grunt.log.writeln( 'Subversion trunk cleaned.' );
+				exec( 'rm -fr ' + svnpath + '/trunk/*' );
+
+				// Subversion Ignorance
+				// grunt.log.writeln( 'Subversion file excluded.' );
+				exec( 'svn propset svn:ignore ".git .gitignore *.md *.sh" "' + svnpath + '/trunk/"' );
 			});
 
 		});
