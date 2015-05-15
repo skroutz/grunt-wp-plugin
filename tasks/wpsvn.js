@@ -21,7 +21,7 @@ module.exports = function( grunt ) {
 		var options = this.options({
 			svn_repo: 'http://plugins.svn.wordpress.org/{plugin-slug}',
 			svn_user: false,
-			build_dir: false,
+			deploy_dir: false,
 			assets_dir: false,
 			plugin_slug: false,
 			max_buffer: 200*1024
@@ -30,20 +30,20 @@ module.exports = function( grunt ) {
 		var pkg = grunt.file.readJSON( 'package.json' );
 		var questions = [];
 
-		if ( ! options.plugin_slug ) {
-			grunt.fail.fatal( 'Plug-in slug is missing.' );
+		if ( ! options.svn_user ) {
+			questions.push({
+				type: 'input',
+				name: 'svn_username',
+				message: 'What\'s your SVN username?'
+			});
 		}
 
 		if ( ! options.deploy_dir ) {
 			grunt.fail.fatal( 'Deploy directory not found.' );
 		}
 
-		if ( ! options.svn_username ) {
-			questions.push({
-				type: 'input',
-				name: 'svn_username',
-				message: 'What\'s your SVN username?'
-			});
+		if ( ! options.plugin_slug ) {
+			grunt.fail.fatal( 'Plug-in slug is missing, stupid.' );
 		}
 
 		inquirer.prompt( questions, function( answers ) {
