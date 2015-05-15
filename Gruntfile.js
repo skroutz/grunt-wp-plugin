@@ -31,7 +31,18 @@ module.exports = function(grunt) {
 		},
 
 		// Configuration to be run (and then tested).
-		wpsvn: {},
+		wpsvn: {
+			options: {
+				assets_dir: 'assets',
+				deploy_dir: 'deploy',
+				svn_username: 'axisthemes'
+			},
+			plugin: {
+				options: {
+					plugin_slug: 'woocommerce-esewa'
+				}
+			}
+		},
 
 		// Unit tests.
 		nodeunit: {
