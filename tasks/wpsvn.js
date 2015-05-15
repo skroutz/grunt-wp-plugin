@@ -67,6 +67,12 @@ module.exports = function( grunt ) {
 			if ( ! grunt.file.exists( plugin_file ) ) {
 				grunt.fail.warn( 'Main' + plugin_file + 'file not found.' );
 			}
+
+			// Get Versions:
+			var readme = grunt.file.read( readme_file );
+			var plugin = grunt.file.read( plugin_file );
+			var readmeVersion = readme.match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
+			var pluginVersion = plugin.match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
 		});
 	});
 };
