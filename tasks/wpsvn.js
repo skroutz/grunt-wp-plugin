@@ -8,12 +8,12 @@
 
 'use strict';
 
-var shell = require( 'shelljs' ), inquirer = require( 'inquirer' );
+var inquirer = require( 'inquirer' );
 
 module.exports = function( grunt ) {
 
 	var path = require( 'path' );
-	var exec = require( 'child_process' ).exec();
+	var exec = require( 'child_process' ).exec;
 
 	grunt.registerMultiTask( 'wpsvn', 'Deploy a Git repo to the WordPress SVN repo.', function() {
 		var cmd, done = this.async();
@@ -50,7 +50,7 @@ module.exports = function( grunt ) {
 
 			// Set up slug, main file, readme file and paths.
 			var slug        = options.plugin_slug;
-			var svnpath     = '/tmp/' + slug;
+			var svnpath     = './tmp/' + slug;
 			var deploy_path = options.deploy_dir.replace( /\/?$/, '/' ); // trailingslash
 			var plugin_file = deploy_path + slug + '.php';
 			var readme_file = deploy_path + 'readme.txt';
@@ -87,10 +87,16 @@ module.exports = function( grunt ) {
 			var message = 'Tagging ' + version;
 
 			// Clean temp
-			cmd = ( 'rm -fr ' + svnpath );
+			cmd = exec( 'rm -fr ' + svnpath );
 
 			// Checkout SVN repository
 			grunt.log.writeln( 'Checking out: ' + svnrepo.cyan );
+
+			cmd = exec( 'svn co ' + svnrepo + ' ' + svnpath, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
+				if ( error !== null ) {
+					grunt.fail.fatal( 'Checkout of "' + svnrepo + '" unsuccessful: ' + error );
+				}
+			});
 
 		});
 	});
