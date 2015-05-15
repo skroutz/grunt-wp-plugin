@@ -15,7 +15,7 @@ module.exports = function( grunt ) {
 	var path = require( 'path' );
 	var exec = require( 'child_process' ).exec();
 
-	grunt.registerMultiTask( 'wpsvn', 'Deploy a project directory to WordPress SVN repo.', function() {
+	grunt.registerMultiTask( 'wpsvn', 'Deploy a Git repo to the WordPress SVN repo.', function() {
 		var done = this.async();
 
 		var options = this.options({
