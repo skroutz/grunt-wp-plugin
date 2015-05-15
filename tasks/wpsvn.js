@@ -13,7 +13,7 @@ var inquirer = require( 'inquirer' );
 module.exports = function( grunt ) {
 
 	var path = require( 'path' );
-	var exec = require( 'child_process' ).exec;
+	var exec = require( 'child_process' ).exec, child;
 
 	grunt.registerMultiTask( 'wpsvn', 'Deploy a Git repo to the WordPress SVN repo.', function() {
 		var cmd, done = this.async();
@@ -87,15 +87,20 @@ module.exports = function( grunt ) {
 			var message = 'Tagging ' + version;
 
 			// Clean temp
-			cmd = exec( 'rm -fr ' + svnpath );
+			child = exec( 'rm -fr ' + svnpath );
 
-			// Checkout SVN repository
-			grunt.log.writeln( 'Checking out: ' + svnrepo.cyan );
+			// Subversion checkout repository
+			grunt.log.writeln( 'Subversion checkout: ' + svnrepo.cyan );
 
-			cmd = exec( 'svn co ' + svnrepo + ' ' + svnpath, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
+			child = exec( 'svn co ' + svnrepo + ' ' + svnpath, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
+				grunt.verbose.writeln( stdout );
+				grunt.verbose.writeln( stderr );
+
 				if ( error !== null ) {
-					grunt.fail.fatal( 'Checkout of "' + svnrepo + '" unsuccessful: ' + error );
+					grunt.fail.fatal( 'Subversion checkout of "' + svnrepo + '" unsuccessful: ' + error );
 				}
+
+				grunt.log.writeln( 'Subversion checkout done.' );
 			});
 
 		});
