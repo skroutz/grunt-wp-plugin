@@ -48,12 +48,12 @@ module.exports = function( grunt ) {
 		inquirer.prompt( questions, function( answers ) {
 
 			// Setup subversion tmp path, user and repo uri
-			var svn_path = '/tmp/' + options.plugin_slug;
+			var svn_path = path.resolve( '/tmp/', options.plugin_slug );
 			var svn_user = options.svn_user || answers.svn_username;
 			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
 
 			// Setup deployment path, Plug-in and Readme files
-			var deploy_path = options.deploy_dir.replace( /\/?$/, '/' ); // trailingslash
+			var deploy_path = path.resolve( options.deploy_dir ).replace( /\/?$/, '/' ); //trailingslash;
 			var plugin_file = deploy_path + options.plugin_slug + '.php';
 			var readme_file = deploy_path + 'readme.txt';
 
