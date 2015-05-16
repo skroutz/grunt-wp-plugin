@@ -69,7 +69,7 @@ module.exports = function( grunt ) {
 			var readme_ver = grunt.file.read( readme_file ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
 
 			// Version Compare
-			if ( !version_compare( plugin_ver[1], readme_ver[1] ) ) {
+			if ( version_compare( plugin_ver[1], readme_ver[1] ) ) {
 				grunt.log.warn( 'Plugin version: ' + ( 'v' + plugin_ver[1] ).cyan );
 				grunt.log.warn( 'Readme version: ' + ( 'v' + readme_ver[1] ).cyan );
 				grunt.fail.warn( 'Main Plug-in and Readme file version do not match.' );
