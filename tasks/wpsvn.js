@@ -50,8 +50,8 @@ module.exports = function( grunt ) {
 		}
 
 		inquirer.prompt( questions, function( answers ) {
-			var deploy_path = path.resolve( options.deploy_dir );
-			var svn_tmp_dir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
+			var deployDir = path.resolve( options.deploy_dir );
+			var svnTmpDir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 
 			/**
 			 * Subversion Arguments.
@@ -73,8 +73,23 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnUpdate = function() {
+				var svnTagsDir  = svnTmpDir + '/tags/' + getVersion();
+				var svnTrunkDir = svnTmpDir + '/trunk';
+
 				// Subversion update
 				grunt.log.writeln( 'Subversion update...' );
+
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
+					grunt.log.ok( 'Subversion update done.' );
+
+					// Delete trunk
+					grunt.file.delete( svnTrunkDir );
+					grunt.log.ok( 'Subversion trunk deleted.' );
+
+					// Copy deploy to trunk
+					grunt.log.writeln( 'Copying deploy to trunk...' );
+
+				});
 			};
 
 			/**
@@ -86,7 +101,7 @@ module.exports = function( grunt ) {
 
 				grunt.log.writeln( 'Subversion checkout: ' + svn_repository.cyan );
 
-				grunt.util.spawn( { cmd: 'svn', args: [ 'co', svn_repository, svn_tmp_dir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svn_repository, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
 					grunt.log.ok( 'Subversion checkout done.' );
 
 					svnUpdate();
@@ -104,7 +119,7 @@ module.exports = function( grunt ) {
 
 				grunt.log.ok( commit_message );
 
-				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commit_message ] ), opts: { stdio: 'inherit', cwd: svn_tmp_dir } },  function( error, result, code ) {
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commit_message ] ), opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
 					grunt.log.ok( commit_message );
 
 					done();
@@ -116,7 +131,7 @@ module.exports = function( grunt ) {
 			 * @return {string} version
 			 */
 			var getVersion = function() {
-				var plugin_path = deploy_path.replace( /\/?$/, '/' ); // trailingslash
+				var plugin_path = deployDir.replace( /\/?$/, '/' ); // trailingslash
 				var plugin_file = plugin_path + options.plugin_slug + '.php';
 				var readme_file = plugin_path + 'readme.txt';
 
@@ -179,7 +194,7 @@ module.exports = function( grunt ) {
 			 */
 			grunt.log.writeln( 'Check if Subversion dir exists...' );
 
-			if ( grunt.file.isDir( svn_tmp_dir ) ) {
+			if ( grunt.file.isDir( svnTmpDir ) ) {
 				grunt.log.ok( 'Subversion dir exists.' );
 
 				svnUpdate();
