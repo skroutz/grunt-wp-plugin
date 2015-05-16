@@ -78,7 +78,7 @@ module.exports = function( grunt ) {
 			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
 
 			// Set subversion tags, trunk and assets path
-			var svn_tag    = svn_path + '/tags/' + plugin_ver[1];
+			var svn_tags   = svn_path + '/tags/' + plugin_ver[1];
 			var svn_trunk  = svn_path + '/trunk';
 			var svn_assets = svn_path + '/assets';
 
@@ -122,12 +122,12 @@ module.exports = function( grunt ) {
 								// Subversion tag
 								grunt.log.writeln( 'Check if Subversion tag dir exists...' );
 
-								if ( grunt.file.isDir( svn_tag ) ) {
+								if ( grunt.file.isDir( svn_tags ) ) {
 									grunt.fail.fatal( 'Subversion tag already exists.' );
 								} else {
 									grunt.log.writeln( 'Subversion tag...' );
 
-									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svn_trunk, svn_tag ], opts: { stdio: 'inherit', cwd: svn_path } },  function( error, result, code ) {
+									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svn_trunk, svn_tags ], opts: { stdio: 'inherit', cwd: svn_path } },  function( error, result, code ) {
 										grunt.log.writeln( 'Subversion tag done.' );
 
 										svnCommit();
