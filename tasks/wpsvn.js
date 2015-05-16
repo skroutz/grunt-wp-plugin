@@ -108,8 +108,8 @@ module.exports = function( grunt ) {
 				exec( 'svn propset svn:ignore ".git .gitignore *.md *.sh" "' + svn_path + '/trunk/"' );
 
 				// Copy deploy to trunk
-				grunt.log.writeln( 'Copying deploy directory: ' + deploy_path.cyan + ' to ' + ( svn_path + '/trunk' ).cyan );
-				// exec( 'cp -R ' + deploy_path + ' ' + svn_path + '/trunk/' );
+				grunt.log.writeln( 'Copying deploy directory: ' + deploy_path.cyan + ' -> ' + ( svn_path + '/trunk' ).cyan );
+				copy_directory( deploy_path, svn_path + '/trunk/' );
 			});
 		});
 	});
@@ -132,5 +132,30 @@ module.exports = function( grunt ) {
 		}
 
 		return 0;
+	};
+
+	// Copy directory
+	var copy_directory = function( src_dir, dest_dir ) {
+		// Ensure directory has trailingslash
+		if ( src_dir.substr(-1) !== '/' ) {
+			src_dir = src_dir + '/';
+		}
+
+		grunt.file.expand({ 'expand': true, 'cwd': src_dir }, '**/*' ).forEach( function( src ) {
+			var dest = unixifyPath( path.join( dest_dir, src ) );
+			if ( grunt.file.isDir( src ) ) {
+				grunt.file.mkdir( dest );
+			} else {
+				grunt.file.copy( src, dest );
+			}
+		});
+	};
+
+	var unixifyPath = function( filepath ) {
+		if ( process.platform === 'win32' ) {
+		  return filepath.replace( /\\/g, '/' );
+		} else {
+		  return filepath;
+		}
 	};
 };
