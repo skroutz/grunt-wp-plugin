@@ -77,28 +77,40 @@ module.exports = function( grunt ) {
 
 			// Set plug-in release credentials
 			var plugin_version = plugin_ver[1];
-			var commit_message = 'Tagging ' + plugin_version;
+			var commit_message = 'Tagging v' + plugin_version;
 
-			/**
-			 * Real work begins :)
-			 */
-			grunt.log.writeln( 'Check if Subversion dir exists...' );
+			// Clean subversion temp directory
+			child = exec( 'rm -fr ' + svn_path );
 
-			if ( grunt.file.isDir( svn_path ) ) {
-				grunt.log.ok( 'Subversion dir exists.' );
-			} else {
-				grunt.log.ok( 'Subversion dir doesn\'t exists.' );
+			// Subversion checkout repository
+			grunt.log.writeln( 'Subversion checkout: ' + svn_repo.cyan );
 
-				grunt.log.writeln( 'Subversion Checkout...' );
+			child = exec( 'svn co ' + svn_repo + ' ' + svn_path, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
+				grunt.verbose.writeln( stdout );
+				grunt.verbose.writeln( stderr );
 
-				grunt.util.spawn({
-					cmd: 'svn',
-					args: [ 'co', svn_repo, svn_path ],
-					opts: { stdio: 'inherit' }
-				}, function( error, result, code ) {
-					grunt.log.ok( 'Subversion checkout done.' );
-				});
-			}
+				if ( error !== null ) {
+					grunt.fail.fatal( 'Checkout of "' + svn_repo + '" unsuccessful: ' + error );
+				}
+
+				grunt.log.writeln( 'Subversion checkout done.' );
+
+				if ( grunt.file.exists( svn_path + '/tags/' + plugin_version ) ) {
+					grunt.fail.warn( 'Tag v' + plugin_version + ' already exists.' );
+				}
+
+				// Clean trunk
+				grunt.log.writeln( 'Subversion trunk cleaned.' );
+				exec( 'rm -fr ' + svn_path + '/trunk/*' );
+
+				// Subversion Ignorance
+				// grunt.log.writeln( 'Subversion file excluded.' );
+				exec( 'svn propset svn:ignore ".git .gitignore *.md *.sh" "' + svn_path + '/trunk/"' );
+
+				// Copy deploy to trunk
+				grunt.log.writeln( 'Copying deploy directory: ' + deploy_path.cyan + ' to ' + ( svn_path + '/trunk' ).cyan );
+				// exec( 'cp -R ' + deploy_path + ' ' + svn_path + '/trunk/' );
+			});
 		});
 	});
 
