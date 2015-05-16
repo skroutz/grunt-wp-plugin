@@ -33,7 +33,7 @@ module.exports = function( grunt ) {
 		// Configuration to be run (and then tested).
 		wpsvn: {
 			options: {
-				svn_user: 'axisthemes'
+				svn_username: 'axisthemes'
 			},
 			plugin: {
 				options: {

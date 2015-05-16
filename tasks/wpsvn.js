@@ -19,143 +19,171 @@ module.exports = function( grunt ) {
 		var done = this.async();
 
 		var options = this.options({
-			svn_repo: 'http://plugins.svn.wordpress.org/{plugin-slug}',
-			svn_user: false,
-			deploy_dir: false,
 			assets_dir: false,
+			deploy_dir: false,
 			plugin_slug: false,
-			max_buffer: 200*1024
+			svn_username: false,
+			svn_repository: 'http://plugins.svn.wordpress.org/{plugin-slug}'
 		});
 
 		var questions = [];
 
-		if ( ! options.svn_user ) {
+		if ( ! options.deploy_dir ) {
+			grunt.fail.fatal( 'Plug-in deploy directory not found.' );
+		} else if ( ! options.plugin_slug ) {
+			grunt.fail.fatal( 'Every plug-in must have a slug, fool.' );
+		} else if ( ! options.svn_username ) {
 			questions.push({
 				type: 'input',
 				name: 'svn_username',
-				message: 'What\'s your SVN username?'
+				message: 'What\'s your SVN Username?',
+				validate: function( answer ) {
+					if ( answer.length < 1 ) {
+						return 'Username can\'t be empty, stupid.';
+					}
+					return true;
+				},
+				filter: function( val ) {
+					return val.toLowerCase();
+				}
 			});
-		}
-
-		if ( ! options.deploy_dir ) {
-			grunt.fail.fatal( 'Deploy directory not found.' );
-		}
-
-		if ( ! options.plugin_slug ) {
-			grunt.fail.fatal( 'Plug-in slug is missing, stupid.' );
 		}
 
 		inquirer.prompt( questions, function( answers ) {
+			var deploy_path = path.resolve( options.deploy_dir );
+			var svn_tmp_dir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 
-			// Setup subversion tmp path, user and repo uri
-			var svn_path = path.resolve( '/tmp/', options.plugin_slug );
-			var svn_user = options.svn_user || answers.svn_username;
-			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
-
-			// Setup deployment path, Plug-in and Readme files
-			var deploy_path = path.resolve( options.deploy_dir ).replace( /\/?$/, '/' ); //trailingslash;
-			var plugin_file = deploy_path + options.plugin_slug + '.php';
-			var readme_file = deploy_path + 'readme.txt';
-
-			// Check if Plug-in and Readme file exists
-			if ( ! grunt.file.exists( plugin_file ) ) {
-				grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
-			} else if ( ! grunt.file.exists( readme_file ) ) {
-				grunt.fail.warn( 'Readme file "' + readme_file + '" not found.' );
-			}
-
-			// Get Versions:
-			var plugin_ver = grunt.file.read( plugin_file ).match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
-			var readme_ver = grunt.file.read( readme_file ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
-
-			// Version Compare
-			if ( version_compare( plugin_ver[1], readme_ver[1] ) ) {
-				grunt.log.warn( 'Plugin version: ' + ( 'v' + plugin_ver[1] ).cyan );
-				grunt.log.warn( 'Readme version: ' + ( 'v' + readme_ver[1] ).cyan );
-				grunt.fail.warn( 'Main Plug-in and Readme file version do not match.' );
-			}
-
-			// Set plug-in release credentials
-			var plugin_version = plugin_ver[1];
-			var commit_message = 'Tagging v' + plugin_version;
-
-			// Clean subversion temp directory
-			child = exec( 'rm -fr ' + svn_path );
-
-			// Subversion checkout repository
-			grunt.log.writeln( 'Checking out: ' + svn_repo.cyan );
-
-			child = exec( 'svn co ' + svn_repo + ' ' + svn_path, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
-				grunt.verbose.writeln( stdout );
-				grunt.verbose.writeln( stderr );
-
-				if ( error !== null ) {
-					grunt.fail.fatal( 'Checkout of "' + svn_repo + '" unsuccessful: ' + error );
+			/**
+			 * Subversion Arguments.
+			 * @param  {array} args
+			 * @return {array} args
+			 */
+			var svnArgs = function( args ) {
+				var svn_username = options.svn_username || answers.svn_username;
+				if ( svn_username ) {
+					args.push( '--username' );
+					args.push( svn_username );
 				}
 
-				grunt.log.writeln( 'Check out complete.' );
+				return args;
+			};
 
-				if ( grunt.file.exists( svn_path + '/tags/' + plugin_version ) ) {
-					grunt.fail.warn( 'Tag ' + plugin_version + ' already exists.' );
+			var svnUpdate = function() {
+				// Subversion update
+				grunt.log.writeln( 'Subversion update...' );
+			};
+
+			/**
+			 * Subversion Checkout Repository.
+			 * @return {null}
+			 */
+			var svnCheckout = function() {
+				var svn_repository = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
+
+				grunt.log.writeln( 'Subversion checkout: ' + svn_repository.cyan );
+
+				grunt.util.spawn( { cmd: 'svn', args: [ 'co', svn_repository, svn_tmp_dir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
+					grunt.log.ok( 'Subversion checkout done.' );
+
+					svnUpdate();
+				});
+			};
+
+			/**
+			 * Subversion Release Commit.
+			 * @return {null}
+			 */
+			var svnCommit = function() {
+				var commit_message = 'Release ' + getVersion() + ', see readme.txt for changelog.';
+
+				grunt.log.writeln( 'Subversion commit...' );
+
+				grunt.log.ok( commit_message );
+
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commit_message ] ), opts: { stdio: 'inherit', cwd: svn_tmp_dir } },  function( error, result, code ) {
+					grunt.log.ok( commit_message );
+
+					done();
+				});
+			};
+
+			/**
+			 * Get Plug-in Release Version.
+			 * @return {string} version
+			 */
+			var getVersion = function() {
+				var plugin_path = deploy_path.replace( /\/?$/, '/' ); // trailingslash
+				var plugin_file = plugin_path + options.plugin_slug + '.php';
+				var readme_file = plugin_path + 'readme.txt';
+
+				// Check if Plug-in and Readme file exists
+				if ( ! grunt.file.exists( plugin_file ) ) {
+					grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
+				} else if ( ! grunt.file.exists( readme_file ) ) {
+					grunt.fail.warn( 'Readme file "' + readme_file + '" not found.' );
 				}
 
-				// Clean subversion trunk directory
-				grunt.log.writeln( 'Subversion trunk cleaned.' );
-				exec( 'rm -fr ' + svn_path + '/trunk/*' );
+				// Get Versions:
+				var plugin_version = grunt.file.read( plugin_file ).match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
+				var readme_version = grunt.file.read( readme_file ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
 
-				// Propset subversion trunk Ignorance
-				// grunt.log.writeln( 'Subversion file excluded.' );
-				exec( 'svn propset svn:ignore ".git .gitignore *.md *.sh" "' + svn_path + '/trunk/"' );
+				// Version Compare
+				if ( version_compare( plugin_version[1], readme_version[1] ) ) {
+					grunt.log.warn( 'Plugin version: ' + ( 'v' + plugin_version[1] ).cyan );
+					grunt.log.warn( 'Readme version: ' + ( 'v' + readme_version[1] ).cyan );
+					grunt.fail.warn( 'Main Plug-in and Readme file version do not match.' );
+				}
 
-				// Copy deploy to subversion trunk directory
-				grunt.log.writeln( 'Copying deploy directory: ' + deploy_path.cyan + ' -> ' + ( svn_path + '/trunk' ).cyan );
-				copy_directory( deploy_path, svn_path + '/trunk/' );
-			});
+				return plugin_version[1];
+			};
+
+			/**
+			 * Simply compares Plug-in and Readme file version.
+			 *
+			 * Returns:
+			 * -1 = plugin is LOWER than readme
+			 *  0 = they are equal
+			 *  1 = plugin is GREATER = readme is LOWER
+			 *  And FALSE if one of input versions are not valid
+			 *
+			 * @param  {string} plugin Plug-in Version
+			 * @param  {string} readme Readme Stable Tag
+			 * @return {integer|boolean}
+			 */
+			var versionCompare = function( plugin, readme ) {
+				if ( typeof plugin + typeof readme !== 'stringstring' ) {
+					return false;
+				}
+
+				var a = plugin.split( '.' );
+				var b = readme.split( '.' );
+
+				for ( var i = 0; i < Math.max( a.length, b.length ); i++ ) {
+					if ( ( a[i] && ! b[i] && parseInt( a[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) > parseInt( b[i], 10 ) ) ) {
+						return 1;
+					} else if ( ( b[i] && ! a[i] && parseInt( b[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) < parseInt( b[i], 10 ) ) ) {
+						return -1;
+					}
+				}
+
+				return 0;
+			};
+
+			/**
+			 * Subversion Update or Checkout Logic.
+			 * @return {null}
+			 */
+			grunt.log.writeln( 'Check if Subversion dir exists...' );
+
+			if ( grunt.file.isDir( svn_tmp_dir ) ) {
+				grunt.log.ok( 'Subversion dir exists.' );
+
+				svnUpdate();
+			} else {
+				grunt.log.ok( 'Subversion dir doesn\'t exists.' );
+
+				svnCheckout();
+			}
 		});
 	});
-
-	// Version compare
-	var version_compare = function( a, b ) {
-		if ( typeof a + typeof b !== 'stringstring' ) {
-			return false;
-		}
-
-		a = a.split( '.' );
-		b = b.split( '.' );
-
-		for ( var i = 0; i < Math.max( a.length, b.length ); i++ ) {
-			if ( ( a[i] && ! b[i] && parseInt( a[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) > parseInt( b[i], 10 ) ) ) {
-				return 1;
-			} else if ( ( b[i] && ! a[i] && parseInt( b[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) < parseInt( b[i], 10 ) ) ) {
-				return -1;
-			}
-		}
-
-		return 0;
-	};
-
-	// Copy directory
-	var copy_directory = function( src_dir, dest_dir ) {
-		// Ensure directory has trailingslash
-		if ( src_dir.substr(-1) !== '/' ) {
-			src_dir = src_dir + '/';
-		}
-
-		grunt.file.expand({ 'expand': true, 'cwd': src_dir }, '**/*' ).forEach( function( src ) {
-			var dest = unixifyPath( path.join( dest_dir, src ) );
-			if ( grunt.file.isDir( src_dir + src ) ) {
-				grunt.file.mkdir( dest );
-			} else {
-				grunt.file.copy( src_dir + src, dest );
-			}
-		});
-	};
-
-	var unixifyPath = function( filepath ) {
-		if ( process.platform === 'win32' ) {
-		  return filepath.replace( /\\/g, '/' );
-		} else {
-		  return filepath;
-		}
-	};
 };
