@@ -68,13 +68,17 @@ module.exports = function( grunt ) {
 				return args;
 			};
 
+			/**
+			 * Subversion Update.
+			 * @return {null}
+			 */
 			var svnUpdate = function() {
 				// Subversion update
 				grunt.log.writeln( 'Subversion update...' );
 			};
 
 			/**
-			 * Subversion Checkout Repository.
+			 * Subversion Checkout.
 			 * @return {null}
 			 */
 			var svnCheckout = function() {
@@ -90,7 +94,7 @@ module.exports = function( grunt ) {
 			};
 
 			/**
-			 * Subversion Release Commit.
+			 * Subversion Commit.
 			 * @return {null}
 			 */
 			var svnCommit = function() {
