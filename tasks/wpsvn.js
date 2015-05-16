@@ -113,14 +113,12 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnCommit = function() {
-				var commit_message = 'Release ' + getVersion() + ', see readme.txt for changelog.';
+				var commitMessage = 'Release ' + getVersion() + ', see readme.txt for changelog.';
 
 				grunt.log.writeln( 'Subversion commit...' );
 
-				grunt.log.ok( commit_message );
-
-				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commit_message ] ), opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
-					grunt.log.ok( commit_message );
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commitMessage ] ), opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
+					grunt.log.ok( commitMessage );
 
 					done();
 				});
