@@ -23,8 +23,7 @@ module.exports = function( grunt ) {
 			svn_user: false,
 			deploy_dir: false,
 			assets_dir: false,
-			plugin_slug: false,
-			max_buffer: 200*1024
+			plugin_slug: false
 		});
 
 		var questions = [];
