@@ -47,11 +47,6 @@ module.exports = function( grunt ) {
 
 		inquirer.prompt( questions, function( answers ) {
 
-			// Set subversion user, tmp path and repo uri
-			var svn_user = options.svn_user || answers.svn_username;
-			var svn_path = path.resolve( path.join( 'tmp', options.plugin_slug ) );
-			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
-
 			// Set deployment path, Plug-in and Readme files
 			var deploy_path = path.resolve( options.deploy_dir );
 			var plugin_file = deploy_path + '/' + options.plugin_slug + '.php';
@@ -75,17 +70,106 @@ module.exports = function( grunt ) {
 				grunt.fail.warn( 'Main Plug-in and Readme file version do not match.' );
 			}
 
-			// Set plug-in release credentials
-			var plugin_version = plugin_ver[1];
-			var commit_message = 'Tagging v' + plugin_version;
+			/**
+			 * Real work begins :)
+			 */
+			var svn_user = options.svn_user || answers.svn_username;
+			var svn_path = path.resolve( path.join( 'tmp', options.plugin_slug ) );
+			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
 
 			// Set subversion tags, trunk and assets path
-			var plugin_tags   = deploy_path + '/tags/' + plugin_version;
-			var plugin_trunk  = deploy_path + '/trunk';
-			var plugin_assets = deploy_path + '/assets';
+			var svn_tag    = svn_path + '/tags/' + plugin_ver[1];
+			var svn_trunk  = svn_path + '/trunk';
+			var svn_assets = svn_path + '/assets';
 
-			// Subversion checkout repository
-			grunt.log.writeln( 'Checking out: ' + svn_repo.cyan );
+			var svnArgs = function( args, username ) {
+				if ( username ) {
+					args.push( '--username=' + username );
+				}
+
+				return args;
+			};
+
+			var svnUpdate = function() {
+				// Subversion update
+				grunt.log.writeln( 'Subversion update...' );
+
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'], svn_user ), opts: { stdio: 'inherit', cwd: svn_path } }, function( error, result, code ) {
+					grunt.log.ok( 'Subversion update done.' );
+
+					// Delete trunk
+					grunt.file.delete( svn_trunk );
+					grunt.log.ok( 'Subversion trunk deleted.' );
+
+					// Copy deploy to trunk
+					grunt.log.writeln( 'Copying deploy to trunk...' );
+
+					grunt.util.spawn( { cmd: 'cp', args: [ '-R', deploy_path, svn_trunk ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
+						grunt.log.ok( 'Copied: ' + deploy_path.cyan + ' -> ' + svn_trunk.cyan + ' done.' );
+
+						// Subverion add
+						grunt.log.writeln( 'Subversion add...' );
+
+						grunt.util.spawn( { cmd: 'svn', args: [ 'add', '.', '--force', '--auto-props', '--parents', '--depth', 'infinity' ], opts: { stdio: 'inherit', cwd: svn_path } }, function( error, result, code ) {
+							grunt.log.ok( 'Subversion add done.' );
+
+							// Subversion remove
+							grunt.log.writeln( 'Subversion remove...' );
+
+							child = exec( "svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )", { cwd: svn_path }, function() {
+								grunt.log.ok( 'Subversion remove done.' );
+
+								// Subversion tag
+								grunt.log.writeln( 'Check if Subversion tag dir exists...' );
+
+								if ( grunt.file.isDir( svn_tag ) ) {
+									grunt.fail.fatal( 'Subversion tag already exists.' );
+								} else {
+									grunt.log.writeln( 'Subversion tag...' );
+
+									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svn_trunk, svn_tag ], opts: { stdio: 'inherit', cwd: svn_path } },  function( error, result, code ) {
+										grunt.log.writeln( 'Subversion tag done.' );
+
+										svnCommit();
+									});
+								}
+							});
+						});
+					});
+				});
+			};
+
+			var svnCommit = function() {
+				var commit_message = 'Release ' + plugin_ver[1] + ', see readme.txt for changelog.';
+
+				grunt.log.writeln( 'Subversion commit...' );
+
+				grunt.log.ok( commit_message );
+
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commit_message ], svn_user ), opts: { stdio: 'inherit', cwd: svn_path } },  function( error, result, code ) {
+					grunt.log.ok( commit_message );
+
+					done();
+				});
+			};
+
+			grunt.log.writeln( 'Check if Subversion dir exists...' );
+
+			if ( grunt.file.isDir( svn_path ) ) {
+				grunt.log.ok( 'Subversion dir exists.' );
+
+				svnUpdate();
+			} else {
+				grunt.log.ok( 'Subversion dir doesn\'t exists.' );
+
+				grunt.log.writeln( 'Checking out: ' + svn_repo.cyan );
+
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svn_repo, svn_path ], svn_user ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
+					grunt.log.ok( 'Subversion checkout done.' );
+
+					svnUpdate();
+				});
+			}
 		});
 	});
 
