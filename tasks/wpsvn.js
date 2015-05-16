@@ -129,51 +129,50 @@ module.exports = function( grunt ) {
 			 * @return {string} version
 			 */
 			var getVersion = function() {
-				var plugin_path = deployDir.replace( /\/?$/, '/' ); // trailingslash
-				var plugin_file = plugin_path + options.plugin_slug + '.php';
-				var readme_file = plugin_path + 'readme.txt';
+				var readme_file = path.join( deployDir, 'readme.txt' );
+				var plugin_file = path.join( deployDir, options.plugin_slug + '.php' );
 
-				// Check if Plug-in and Readme file exists
-				if ( ! grunt.file.exists( plugin_file ) ) {
-					grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
-				} else if ( ! grunt.file.exists( readme_file ) ) {
+				// Check if Readme and Plug-in file exists
+				if ( ! grunt.file.exists( readme_file ) ) {
 					grunt.fail.warn( 'Readme file "' + readme_file + '" not found.' );
+				} else if ( ! grunt.file.exists( plugin_file ) ) {
+					grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
 				}
 
-				// Get Versions:
-				var plugin_version = grunt.file.read( plugin_file ).match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
+				// Get Versions
 				var readme_version = grunt.file.read( readme_file ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
+				var plugin_version = grunt.file.read( plugin_file ).match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
 
-				// Version Compare
-				if ( version_compare( plugin_version[1], readme_version[1] ) ) {
-					grunt.log.warn( 'Plugin version: ' + ( 'v' + plugin_version[1] ).cyan );
+				// Compare Versions
+				if ( versionCompare( readme_version[1], plugin_version[1] ) ) {
 					grunt.log.warn( 'Readme version: ' + ( 'v' + readme_version[1] ).cyan );
-					grunt.fail.warn( 'Main Plug-in and Readme file version do not match.' );
+					grunt.log.warn( 'Plugin version: ' + ( 'v' + plugin_version[1] ).cyan );
+					grunt.fail.warn( 'Main Readme and Plugin file versions do not match.' );
 				}
 
 				return plugin_version[1];
 			};
 
 			/**
-			 * Simply compares Plug-in and Readme file version.
+			 * Simply compares Readme and Plug-in file version.
 			 *
 			 * Returns:
-			 * -1 = plugin is LOWER than readme
+			 * -1 = readme is LOWER than plugin
 			 *  0 = they are equal
-			 *  1 = plugin is GREATER = readme is LOWER
+			 *  1 = readme is GREATER = plugin is LOWER
 			 *  And FALSE if one of input versions are not valid
 			 *
-			 * @param  {string} plugin Plug-in Version
 			 * @param  {string} readme Readme Stable Tag
+			 * @param  {string} plugin Main Plug-in Version
 			 * @return {integer|boolean}
 			 */
-			var versionCompare = function( plugin, readme ) {
-				if ( typeof plugin + typeof readme !== 'stringstring' ) {
+			var versionCompare = function( readme, plugin ) {
+				if ( typeof readme + typeof plugin !== 'stringstring' ) {
 					return false;
 				}
 
-				var a = plugin.split( '.' );
-				var b = readme.split( '.' );
+				var a = readme.split( '.' );
+				var b = plugin.split( '.' );
 
 				for ( var i = 0; i < Math.max( a.length, b.length ); i++ ) {
 					if ( ( a[i] && ! b[i] && parseInt( a[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) > parseInt( b[i], 10 ) ) ) {
