@@ -47,15 +47,15 @@ module.exports = function( grunt ) {
 
 		inquirer.prompt( questions, function( answers ) {
 
-			// Setup subversion tmp path, user and repo uri
-			var svn_path = path.resolve( '/tmp/', options.plugin_slug );
+			// Set subversion user, tmp path and repo uri
 			var svn_user = options.svn_user || answers.svn_username;
+			var svn_path = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
 
-			// Setup deployment path, Plug-in and Readme files
-			var deploy_path = path.resolve( options.deploy_dir ).replace( /\/?$/, '/' ); //trailingslash;
-			var plugin_file = deploy_path + options.plugin_slug + '.php';
-			var readme_file = deploy_path + 'readme.txt';
+			// Set deployment path, Plug-in and Readme files
+			var deploy_path = path.resolve( options.deploy_dir );
+			var plugin_file = deploy_path + '/' + options.plugin_slug + '.php';
+			var readme_file = deploy_path + '/readme.txt';
 
 			// Check if Plug-in and Readme file exists
 			if ( ! grunt.file.exists( plugin_file ) ) {
@@ -79,38 +79,13 @@ module.exports = function( grunt ) {
 			var plugin_version = plugin_ver[1];
 			var commit_message = 'Tagging v' + plugin_version;
 
-			// Clean subversion temp directory
-			child = exec( 'rm -fr ' + svn_path );
+			// Set subversion tags, trunk and assets path
+			var plugin_tags   = deploy_path + '/tags/' + plugin_version;
+			var plugin_trunk  = deploy_path + '/trunk';
+			var plugin_assets = deploy_path + '/assets';
 
 			// Subversion checkout repository
 			grunt.log.writeln( 'Checking out: ' + svn_repo.cyan );
-
-			child = exec( 'svn co ' + svn_repo + ' ' + svn_path, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
-				grunt.verbose.writeln( stdout );
-				grunt.verbose.writeln( stderr );
-
-				if ( error !== null ) {
-					grunt.fail.fatal( 'Checkout of "' + svn_repo + '" unsuccessful: ' + error );
-				}
-
-				grunt.log.writeln( 'Check out complete.' );
-
-				if ( grunt.file.exists( svn_path + '/tags/' + plugin_version ) ) {
-					grunt.fail.warn( 'Tag ' + plugin_version + ' already exists.' );
-				}
-
-				// Clean subversion trunk directory
-				grunt.log.writeln( 'Subversion trunk cleaned.' );
-				exec( 'rm -fr ' + svn_path + '/trunk/*' );
-
-				// Propset subversion trunk Ignorance
-				// grunt.log.writeln( 'Subversion file excluded.' );
-				exec( 'svn propset svn:ignore ".git .gitignore *.md *.sh" "' + svn_path + '/trunk/"' );
-
-				// Copy deploy to subversion trunk directory
-				grunt.log.writeln( 'Copying deploy directory: ' + deploy_path.cyan + ' -> ' + ( svn_path + '/trunk' ).cyan );
-				copy_directory( deploy_path, svn_path + '/trunk/' );
-			});
 		});
 	});
 
@@ -132,30 +107,5 @@ module.exports = function( grunt ) {
 		}
 
 		return 0;
-	};
-
-	// Copy directory
-	var copy_directory = function( src_dir, dest_dir ) {
-		// Ensure directory has trailingslash
-		if ( src_dir.substr(-1) !== '/' ) {
-			src_dir = src_dir + '/';
-		}
-
-		grunt.file.expand({ 'expand': true, 'cwd': src_dir }, '**/*' ).forEach( function( src ) {
-			var dest = unixifyPath( path.join( dest_dir, src ) );
-			if ( grunt.file.isDir( src_dir + src ) ) {
-				grunt.file.mkdir( dest );
-			} else {
-				grunt.file.copy( src_dir + src, dest );
-			}
-		});
-	};
-
-	var unixifyPath = function( filepath ) {
-		if ( process.platform === 'win32' ) {
-		  return filepath.replace( /\\/g, '/' );
-		} else {
-		  return filepath;
-		}
 	};
 };
