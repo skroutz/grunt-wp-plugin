@@ -8,7 +8,7 @@
 
 'use strict';
 
-module.exports = function(grunt) {
+module.exports = function( grunt ) {
 
 	// Project Configuration.
 	grunt.initConfig({
@@ -38,7 +38,7 @@ module.exports = function(grunt) {
 			plugin: {
 				options: {
 					deploy_dir: 'deploy',
-					assets_dir: 'deploy/assets',
+					assets_dir: 'wp-assets',
 					plugin_slug: 'woocommerce-esewa'
 				}
 			}
