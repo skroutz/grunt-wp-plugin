@@ -69,6 +69,22 @@ module.exports = function( grunt ) {
 			};
 
 			/**
+			 * Subversion Checkout.
+			 * @return {null}
+			 */
+			var svnCheckout = function() {
+				var svn_repository = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
+
+				grunt.log.writeln( 'Subversion checkout: ' + svn_repository.cyan );
+
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svn_repository, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
+					grunt.log.ok( 'Subversion checkout done.' );
+
+					svnUpdate();
+				});
+			};
+
+			/**
 			 * Subversion Update.
 			 * @return {null}
 			 */
@@ -89,22 +105,6 @@ module.exports = function( grunt ) {
 					// Copy deploy to trunk
 					grunt.log.writeln( 'Copying deploy to trunk...' );
 
-				});
-			};
-
-			/**
-			 * Subversion Checkout.
-			 * @return {null}
-			 */
-			var svnCheckout = function() {
-				var svn_repository = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
-
-				grunt.log.writeln( 'Subversion checkout: ' + svn_repository.cyan );
-
-				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svn_repository, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
-					grunt.log.ok( 'Subversion checkout done.' );
-
-					svnUpdate();
 				});
 			};
 
