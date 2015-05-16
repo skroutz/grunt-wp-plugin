@@ -16,7 +16,7 @@ module.exports = function( grunt ) {
 	var exec = require( 'child_process' ).exec, child;
 
 	grunt.registerMultiTask( 'wpsvn', 'Deploy a Git repo to the WordPress SVN repo.', function() {
-		var cmd, done = this.async();
+		var done = this.async();
 
 		var options = this.options({
 			svn_repo: 'http://plugins.svn.wordpress.org/{plugin-slug}',
@@ -27,7 +27,6 @@ module.exports = function( grunt ) {
 			max_buffer: 200*1024
 		});
 
-		var pkg = grunt.file.readJSON( 'package.json' );
 		var questions = [];
 
 		if ( ! options.svn_user ) {
@@ -48,77 +47,44 @@ module.exports = function( grunt ) {
 
 		inquirer.prompt( questions, function( answers ) {
 
-			// Set up slug, main file, readme file and paths.
-			var slug        = options.plugin_slug;
-			var svnpath     = './tmp/' + slug;
-			var deploy_path = options.deploy_dir.replace( /\/?$/, '/' ); // trailingslash
-			var plugin_file = deploy_path + slug + '.php';
-			var readme_file = deploy_path + 'readme.txt';
+			// Setup subversion user, tmp path and repo uri
+			var svn_user = options.svn_user || answers.svn_username;
+			var svn_path = path.resolve( 'tmp/' + options.plugin_slug );
+			var svn_repo = options.svn_repo.replace( '{plugin-slug}', options.plugin_slug );
 
-			// SVN User and Repository URI
-			var svnuser = options.svn_user || answers.svn_username;
-			var svnrepo = options.svn_repo.replace( '{plugin-slug}', slug );
+			// Setup deployment path, Plug-in and Readme files
+			var deploy_path = path.resolve( options.deploy_dir );
+			var readme_file = deploy_path + '/readme.txt';
+			var plugin_file = deploy_path + '/' + options.plugin_slug + '.php';
 
-			// Try to find Readme file
+			// Check if Readme file exist
 			if ( ! grunt.file.exists( readme_file ) ) {
 				grunt.fail.warn( 'Readme file "' + readme_file + '" not found.' );
 			}
 
-			// Try to find plug-in file
+			// Check if Plug-in file exist
 			if ( ! grunt.file.exists( plugin_file ) ) {
 				grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
 			}
 
 			// Get Versions:
-			var readme = grunt.file.read( readme_file );
-			var plugin = grunt.file.read( plugin_file );
-			var readme_ver = readme.match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
-			var plugin_ver = plugin.match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
+			var readme_ver = grunt.file.read( readme_file ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
+			var plugin_ver = grunt.file.read( plugin_file ).match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
 
 			// Version Compare
-			if ( version_compare( plugin_ver[1], readme_ver[1] ) ) {
+			if ( ! version_compare( readme_ver[1], plugin_ver[1] ) ) {
 				grunt.log.warn( 'Readme version: ' + readme_ver[1] );
 				grunt.log.warn( 'Plugin version: ' + plugin_ver[1] );
-				grunt.fail.warn( 'Plugin and Readme version do not match.' );
+				grunt.fail.warn( 'Readme and Plug-in version do not match.' );
 			}
 
-			// Set variables
-			var version = plugin_ver[1];
-			var message = 'Tagging ' + version;
-
-			// Clean temp
-			child = exec( 'rm -fr ' + svnpath );
-
-			// Subversion checkout repository
-			grunt.log.writeln( 'Subversion checkout: ' + svnrepo.cyan );
-
-			child = exec( 'svn co ' + svnrepo + ' ' + svnpath, { maxBuffer: options.max_buffer }, function( error, stdout, stderr ) {
-				grunt.verbose.writeln( stdout );
-				grunt.verbose.writeln( stderr );
-
-				if ( error !== null ) {
-					grunt.fail.fatal( 'Subversion checkout of "' + svnrepo + '" unsuccessful: ' + error );
-				}
-
-				grunt.log.writeln( 'Subversion checkout done.' );
-
-				if ( grunt.file.exists( svnpath + '/tags/' + version ) ) {
-					grunt.fail.warn( 'Tag ' + version + ' already exists.' );
-				}
-
-				// Clean trunk
-				grunt.log.writeln( 'Subversion trunk cleaned.' );
-				exec( 'rm -fr ' + svnpath + '/trunk/*' );
-
-				// Subversion Ignorance
-				// grunt.log.writeln( 'Subversion file excluded.' );
-				exec( 'svn propset svn:ignore ".git .gitignore *.md *.sh" "' + svnpath + '/trunk/"' );
-			});
-
+			// Set plug-in release credentials
+			var plugin_version = plugin_ver[1];
+			var commit_message = 'Tagging ' + plugin_version;
 		});
 	});
 
-	// Version Compare
+	// Version compare
 	var version_compare = function( a, b ) {
 		if ( typeof a + typeof b !== 'stringstring' ) {
 			return false;
