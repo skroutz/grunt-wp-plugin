@@ -157,6 +157,14 @@ module.exports = function( grunt ) {
 			};
 
 			/**
+			 * Subversion assets.
+			 * @return {null}
+			 */
+			var svnAssets = function() {
+				var svnAssetsDir = svnTmpDir + '/assets';
+			};
+
+			/**
 			 * Get Plug-in Release Version.
 			 * @return {string} version
 			 */
