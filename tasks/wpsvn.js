@@ -155,7 +155,8 @@ module.exports = function( grunt ) {
 			};
 
 			/**
-			 * Subversion assets.
+			 * Subversion Assets.
+			 * @param  {string} commitMessage No prompt, apply commit message.
 			 * @return {null}
 			 */
 			var svnAssets = function( commitMessage ) {
