@@ -105,6 +105,38 @@ module.exports = function( grunt ) {
 					// Copy deploy to trunk
 					grunt.log.writeln( 'Copying deploy to trunk...' );
 
+					grunt.util.spawn( { cmd: 'cp', args: [ '-R', deployDir, svnTrunkDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
+						grunt.log.ok( 'Copied: ' + deployDir.cyan + ' -> ' + svnTrunkDir.cyan );
+
+						// Subversion add
+						grunt.log.writeln( 'Subversion add...' );
+
+						grunt.util.spawn( { cmd: 'svn', args: [ 'add', '.', '--force', '--auto-props', '--parents', '--depth', 'infinity' ], opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
+							grunt.log.ok( 'Subversion add done.' );
+
+							// Subversion remove
+							grunt.log.writeln( 'Subversion remove...' );
+
+							child = exec( "svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )", { cwd: svnTmpDir }, function() {
+								grunt.log.ok( 'Subversion remove done.' );
+
+								// Subversion tag
+								grunt.log.writeln( 'Check if Subversion tag dir exists...' );
+
+								if ( grunt.file.isDir( svnTagsDir ) ) {
+									grunt.fail.fatal( 'Subversion tag already exists.' );
+								} else {
+									grunt.log.writeln( 'Subversion tag...' );
+
+									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
+										grunt.log.writeln( 'Subversion tag done.' );
+
+										svnCommit();
+									});
+								}
+							});
+						});
+					});
 				});
 			};
 
