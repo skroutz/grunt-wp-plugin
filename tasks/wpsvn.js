@@ -129,7 +129,7 @@ module.exports = function( grunt ) {
 									grunt.log.writeln( 'Subversion tag...' );
 
 									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
-										grunt.log.writeln( 'Subversion tag done.' );
+										grunt.log.ok( 'Subversion tag done.' );
 
 										svnCommit();
 									});
