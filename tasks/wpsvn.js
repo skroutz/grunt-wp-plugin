@@ -160,8 +160,70 @@ module.exports = function( grunt ) {
 			 * Subversion assets.
 			 * @return {null}
 			 */
-			var svnAssets = function() {
+			var svnAssets = function( commitMessage ) {
 				var svnAssetsDir = svnTmpDir + '/assets';
+
+				var questions = [];
+
+				if ( ! commitMessage ) {
+					questions.push({
+						type: 'confirm',
+						name: 'update_assets',
+						message: 'Are you sure you want to update plug-in assets?',
+						default: true
+					},
+					{
+						type: 'list',
+						name: 'commit',
+						message: 'What commit message do you need?',
+						choices: [ 'Custom', 'Default' ],
+						when: function( answers ) {
+							return answers.update_assets;
+						},
+						filter: function( val ) {
+							return val.toLowerCase();
+						}
+					},
+					{
+						type: 'rawlist',
+						name: 'commit_list',
+						message: 'What about these commit message?',
+						choices: [
+							'All Plug-in assets updated.',
+							new inquirer.Separator(),
+							'Updated Plug-in icon images.',
+							'Updated Plug-in banner images.',
+							'Updated Plug-in screenshots images.'
+						],
+						when: function( answers ) {
+							return answers.commit === 'default';
+						}
+					},
+					{
+						type: 'input',
+						name: 'commit_message',
+						message: 'Any commit message on your need',
+						default: 'All Plug-in assets updated successfully.',
+						when: function( answers ) {
+							return answers.commit === 'custom';
+						}
+					});
+				}
+
+				inquirer.prompt( questions, function( answers ) {
+					var message = '';
+
+					if ( commitMessage ) {
+						message = commitMessage;
+					} else if ( answers.update_assets ) {
+						message = ( answers.commit !== 'custom' ) ? answers.commit_list : answers.commit_message;
+					} else {
+						grunt.log.warn( 'Aborting Plug-in assets update...' );
+						return;
+					}
+
+					grunt.log.ok( message );
+				});
 			};
 
 			/**
