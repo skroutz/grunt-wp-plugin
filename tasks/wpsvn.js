@@ -42,9 +42,6 @@ module.exports = function( grunt ) {
 						return 'Username can\'t be empty, stupid.';
 					}
 					return true;
-				},
-				filter: function( val ) {
-					return val.toLowerCase();
 				}
 			});
 		}
