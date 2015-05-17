@@ -161,14 +161,17 @@ module.exports = function( grunt ) {
 			var svnAssets = function( commitMessage ) {
 				var svnAssetsDir = svnTmpDir + '/assets';
 
-				var questions = [];
-
-				if ( ! commitMessage ) {
-					questions.push({
+				inquirer.prompt([
+					{
 						type: 'confirm',
 						name: 'update_assets',
 						message: 'Are you sure you want to update plug-in assets?',
-						default: true
+						default: true,
+						when: function() {
+							if ( ! commitMessage ) {
+								return true;
+							}
+						}
 					},
 					{
 						type: 'list',
@@ -205,10 +208,8 @@ module.exports = function( grunt ) {
 						when: function( answers ) {
 							return answers.commit === 'custom';
 						}
-					});
-				}
-
-				inquirer.prompt( questions, function( answers ) {
+					}
+				], function( answers ) {
 					var message = '';
 
 					if ( commitMessage ) {
