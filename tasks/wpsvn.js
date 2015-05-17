@@ -26,27 +26,28 @@ module.exports = function( grunt ) {
 			svn_repository: 'http://plugins.svn.wordpress.org/{plugin-slug}'
 		});
 
-		var questions = [];
-
 		if ( ! options.deploy_dir ) {
 			grunt.fail.fatal( 'Plug-in deploy directory not found.' );
 		} else if ( ! options.plugin_slug ) {
 			grunt.fail.fatal( 'Every plug-in must have a slug, fool.' );
-		} else if ( ! options.svn_username ) {
-			questions.push({
-				type: 'input',
-				name: 'svn_username',
-				message: 'What\'s your SVN Username?',
-				validate: function( answer ) {
-					if ( answer.length < 1 ) {
-						return 'Username can\'t be empty, stupid.';
-					}
-					return true;
-				}
-			});
 		}
 
-		inquirer.prompt( questions, function( answers ) {
+		inquirer.prompt([{
+			type: 'input',
+			name: 'svn_username',
+			message: 'What\'s your SVN Username?',
+			when: function() {
+				if ( ! options.svn_username ) {
+					return true;
+				}
+			},
+			validate: function( answer ) {
+				if ( answer.length < 1 ) {
+					return 'Username can\'t be empty, stupid.';
+				}
+				return true;
+			}
+		}], function( answers ) {
 			var deployDir = path.resolve( options.deploy_dir );
 			var svnTmpDir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 
