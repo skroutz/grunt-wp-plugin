@@ -1,6 +1,6 @@
 /*
- * grunt-wp-svn
- * https://github.com/axisthemes/grunt-wp-svn
+ * grunt-wp-plugin
+ * https://github.com/axisthemes/grunt-wp-plugin
  *
  * Copyright (c) 2014 AxisThemes
  * Licensed under the MIT license.
@@ -15,7 +15,7 @@ module.exports = function( grunt ) {
 	var path = require( 'path' );
 	var exec = require( 'child_process' ).exec, child;
 
-	grunt.registerMultiTask( 'wpsvn', 'Deploy a Git repo to the WordPress SVN repo.', function() {
+	grunt.registerMultiTask( 'wp_plugin', 'Deploy WordPress plug-in to SVN repository.', function() {
 		var done = this.async();
 
 		var options = this.options({

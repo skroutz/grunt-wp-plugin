@@ -1,6 +1,6 @@
 # grunt-wp-plugin
 
-> Grunt plug-in to deploy WordPress Plug-in to SVN repository.
+> Grunt plug-in to deploy WordPress plug-in to SVN repository.
 
 ### Requirements
 * This plugin requires Grunt `~0.4.5`
