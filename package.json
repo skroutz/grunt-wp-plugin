@@ -1,7 +1,7 @@
 {
   "name": "grunt-wp-plugin",
   "description": "Grunt plug-in to deploy the WordPress plug-in to SVN repository.",
-  "version": "1.0.0",
+  "version": "1.0.1-0",
   "homepage": "https://github.com/axisthemes/grunt-wp-plugin",
   "author": {
     "name": "AxisThemes",
