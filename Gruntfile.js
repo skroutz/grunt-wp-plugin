@@ -34,13 +34,13 @@ module.exports = function( grunt ) {
 		wpsvn: {
 			options: {
 				svn_username: 'shivapoudel',
-				svn_repository: 'https://svn.riouxsvn.com/grunt-wp-svn'
+				svn_repository: 'https://svn.riouxsvn.com/{plugin-slug}'
 			},
 			plugin: {
 				options: {
-					deploy_dir: 'deploy/',
-					assets_dir: 'wp-assets/',
-					plugin_slug: 'grunt-wp-svn'
+					assets_dir: 'test/assets/',
+					deploy_dir: 'test/deploy/',
+					plugin_slug: 'wp-svn-plugin'
 				}
 			}
 		},
