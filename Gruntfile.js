@@ -61,7 +61,7 @@ module.exports = function( grunt ) {
 
 	// Whenever the "test" task is run, first clean the "tmp" dir, then run this
 	// plugin's task(s), then test the result.
-	grunt.registerTask( 'test', ['clean', 'wpsvn', 'nodeunit'] );
+	grunt.registerTask( 'test', ['clean', 'wp_plugin', 'nodeunit'] );
 
 	// Register default task.
 	grunt.registerTask( 'default', ['jshint', 'test'] );
