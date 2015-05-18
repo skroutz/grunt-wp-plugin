@@ -34,7 +34,7 @@ module.exports = function( grunt ) {
 		wp_plugin: {
 			options: {
 				svn_username: 'shivapoudel',
-				svn_repository: 'https://svn.riouxsvn.com/{plugin-slug}' // wp-svn-plugin
+				svn_repository: 'https://svn.riouxsvn.com/{plugin-slug}' // wp-plugin-test
 			},
 			plugin: {
 				options: {
