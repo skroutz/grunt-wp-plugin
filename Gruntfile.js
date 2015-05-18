@@ -1,6 +1,6 @@
 /*
- * grunt-wp-svn
- * https://github.com/axisthemes/grunt-wp-svn
+ * grunt-wp-plugin
+ * https://github.com/axisthemes/grunt-wp-plugin
  *
  * Copyright (c) 2014 AxisThemes
  * Licensed under the MIT license.

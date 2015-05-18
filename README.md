@@ -1,26 +1,26 @@
-# grunt-wp-svn
+# grunt-wp-plugin
 
-> Grunt plug-in to deploy a Git repo to the WordPress SVN repo.
+> Grunt plug-in to deploy WordPress Plug-in to SVN repository.
 
 ### Requirements
 * This plugin requires Grunt `~0.4.5`
-* [Git](http://git-scm.com/) and [Subversion](https://subversion.apache.org/) installed and in your PATH.
+* [Subversion](https://subversion.apache.org/) installed and in your PATH.
 
 ## Getting Started
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install grunt-wp-svn --save-dev
+npm install grunt-wp-plugin --save-dev
 ```
 
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks( 'grunt-wp-svn' );
+grunt.loadNpmTasks( 'grunt-wp-plugin' );
 ```
 
-## The "wpsvn" task
-_Run this task with the `grunt wpsvn` command._
+## The "wp_plugin" task
+_Run this task with the `grunt wp_plugin` command._
 
 Task targets, files and options may be specified according to the grunt [Configuring tasks](http://gruntjs.com/configuring-tasks) guide.
 

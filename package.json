@@ -1,8 +1,8 @@
 {
-  "name": "grunt-wp-svn",
-  "description": "Grunt plug-in to deploy a Git repo to the WordPress SVN repo.",
+  "name": "grunt-wp-plugin",
+  "description": "Grunt plug-in to deploy WordPress Plug-in to SVN repository.",
   "version": "0.1.0",
-  "homepage": "https://github.com/axisthemes/grunt-wp-svn",
+  "homepage": "https://github.com/axisthemes/grunt-wp-plugin",
   "author": {
     "name": "AxisThemes",
     "email": "axisthemes@gmail.com",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/axisthemes/grunt-wp-svn.git"
+    "url": "git://github.com/axisthemes/grunt-wp-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/axisthemes/grunt-wp-svn/issues"
+    "url": "https://github.com/axisthemes/grunt-wp-plugin/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/axisthemes/grunt-wp-svn/blob/master/LICENSE-MIT"
+      "url": "https://github.com/axisthemes/grunt-wp-plugin/blob/master/LICENSE-MIT"
     }
   ],
   "main": "Gruntfile.js",
@@ -45,7 +45,7 @@
     "wordpress",
     "plugin",
     "deploy",
-    "git",
-    "svn"
+    "svn",
+    "git"
   ]
 }
