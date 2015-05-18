@@ -43,6 +43,7 @@
   "keywords": [
     "gruntplugin",
     "wordpress",
+    "plugin",
     "deploy",
     "git",
     "svn"
