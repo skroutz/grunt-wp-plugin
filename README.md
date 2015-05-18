@@ -21,7 +21,7 @@ grunt.loadNpmTasks( 'grunt-wp-plugin' );
 
 ## The "wp_plugin" task
 
-This task is for deploying a plug-in to the [WordPress repository](http://wordpress.org/plugins/) from a `deploy directory`.
+This task is for deploying a plug-in to the [WordPress repository](http://wordpress.org/plugins/) from a `deploy` directory.
 
 _Run this task with the `grunt wp_plugin` command._
 
