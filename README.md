@@ -20,13 +20,71 @@ grunt.loadNpmTasks( 'grunt-wp-plugin' );
 ```
 
 ## The "wp_plugin" task
+
+This task is for deploying a plug-in to the [WordPress repository](http://wordpress.org/plugins/) from a `deploy directory`.
+
 _Run this task with the `grunt wp_plugin` command._
 
-Task targets, files and options may be specified according to the grunt [Configuring tasks](http://gruntjs.com/configuring-tasks) guide.
+### Before you start, you'll need...
+ 1. To have been [accepted](http://wordpress.org/plugins/about/) on to the WordPress repository
+ 2. **readme.txt** - See [http://wordpress.org/plugins/about/#readme](http://wordpress.org/plugins/about/#readme)
+ 3. **plugin-slug** - Get this from your plug-in's repo url: *http://wordpress.org/plugins/{plugin-slug}*
+ 4. **plugin-slug.php** - The 'main file' of the plug-in(containing the plugin header). Currently this must be named `{plugin-slug}.php` where `{plugin-slug}` should be replaced by your plug-in's slug. See (3).
+ 5. **deploy directory** - This is a complete copy of the plug-in as you want it on the directory.
+ 6. **assets directory** - (Optional) This directory should contain the plug-in's icons, banners and screenshots that you want in the 'assets' directory in the root of the plug-ins WordPress SVN repo. See [https://wordpress.org/plugins/about/faq/](https://wordpress.org/plugins/about/faq/) for details.
+
+### Overview
+
+In your project's Gruntfile, add a section named `wp_plugin` to the data object passed into `grunt.initConfig()`.
+
+```js
+grunt.initConfig({
+  wp_plugin: {
+    deploy: {
+      options: {
+        assets_dir: 'wp-assets-dir',   // Relative path to your assets directory (optional).
+        deploy_dir: 'wp-deploy-dir',   // Relative path to your deploy directory (required).
+        plugin_slug: 'your-plugin-slug',
+        svn_username: 'your-wp-repo-username'
+      }
+    }
+  }
+});
+```
 
 ### Options
 
-_WE WILL INDEX SOON:_
+#### options.assets_dir
+Type: `String`
+Default value: `false`
+
+The directory where the plug-in's assets (i.e. icons, banners and screenshots) exist. This gets copied into the *assets* directory in the root of your WordPress SVN repo.
+Typically this directory contains your plug-in's icons, banners and screenshots, which you want uploaded to the WordPress repo, but do not necessary want included in the plug-in distributed 
+to users. For more details see: [https://wordpress.org/plugins/about/faq/](https://wordpress.org/plugins/about/faq/).
+
+#### options.deploy_dir
+Type: `String`
+Default value: `false`
+
+The directory where the plug-in exists as you want it on the repo.
+
+#### options.plugin_slug
+Type: `String`
+Default value: `false`
+
+Your plug-in's slug as indicated by its repository url *http://wordpress.org/plugins/{plugin-slug}*
+
+#### options.svn_username
+Type: `String`
+Default value: `false`
+
+Your WordPress repository username. If not provided, you'll be prompted for this when the task runs.
+
+#### options.svn_repository
+Type: `String`
+Default value: `http://plugins.svn.wordpress.org/{plugin-slug}`
+
+For flexibilty this plug-in can work with other repos. Simple provide the SVN url, using `{plugin-slug}` as placeholder indicating where the plug-in slug should be.
 
 ## License
 
