@@ -33,13 +33,14 @@ module.exports = function( grunt ) {
 		// Configuration to be run (and then tested).
 		wpsvn: {
 			options: {
-				svn_username: 'axisthemes'
+				svn_username: 'shivapoudel',
+				svn_repository: 'https://svn.riouxsvn.com/grunt-wp-svn'
 			},
 			plugin: {
 				options: {
 					deploy_dir: 'deploy/',
 					assets_dir: 'wp-assets/',
-					plugin_slug: 'woocommerce-esewa'
+					plugin_slug: 'grunt-wp-svn'
 				}
 			}
 		},
