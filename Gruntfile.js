@@ -40,7 +40,7 @@ module.exports = function( grunt ) {
 				options: {
 					assets_dir: 'test/assets/',
 					deploy_dir: 'test/deploy/',
-					plugin_slug: 'wp-plugin-deploy'
+					plugin_slug: 'wp-plugin-test'
 				}
 			}
 		},

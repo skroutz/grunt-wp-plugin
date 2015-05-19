@@ -1,2 +1,2 @@
-=== WP Plug-in Deploy ===
+=== WP Plug-in Test ===
 Stable tag: 0.1.0
