@@ -26,10 +26,21 @@ module.exports = function( grunt ) {
 			svn_repository: 'http://plugins.svn.wordpress.org/{plugin-slug}'
 		});
 
-		if ( ! options.deploy_dir ) {
+		var deployDir  = path.resolve( options.deploy_dir );
+		var readmeFile = path.join( deployDir, 'readme.txt' );
+		var pluginFile = path.join( deployDir, options.plugin_slug + '.php' );
+
+		// Check before processing
+		if ( ! options.plugin_slug ) {
+			grunt.fail.fatal( 'Plug-in must have a slug, stupid.' );
+		} else if ( ! grunt.file.isDir( deployDir ) ) {
 			grunt.fail.fatal( 'Plug-in deploy directory not found.' );
-		} else if ( ! options.plugin_slug ) {
-			grunt.fail.fatal( 'Every plug-in must have a slug, fool.' );
+		} else if ( ! grunt.file.exists( readmeFile ) ) {
+			grunt.fail.fatal( 'Plug-in file "readme.txt" is missing.' );
+		} else if ( ! grunt.file.exists( pluginFile ) ) {
+			grunt.fail.fatal( 'Plug-in file "' + options.plugin_slug + '.php" is missing.' );
+		} else {
+			grunt.verbose.ok( 'Plug-in is valid for processing...' );
 		}
 
 		inquirer.prompt([{
@@ -43,12 +54,11 @@ module.exports = function( grunt ) {
 			},
 			validate: function( answers ) {
 				if ( answers.length < 1 ) {
-					return 'Username cannot be empty, stupid.';
+					return 'Username cannot be empty, fool.';
 				}
 				return true;
 			}
 		}], function( answers ) {
-			var deployDir = path.resolve( options.deploy_dir );
 			var svnTmpDir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 
 			/**
