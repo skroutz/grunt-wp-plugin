@@ -118,8 +118,6 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnUpdate = function() {
-				var svnTagsDir  = svnTmpDir + '/tags/' + pluginVersion[1];
-				var svnTrunkDir = svnTmpDir + '/trunk';
 
 				// Subversion update
 				grunt.log.writeln( 'Subversion update...' );
