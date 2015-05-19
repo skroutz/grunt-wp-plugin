@@ -11,7 +11,6 @@
 var inquirer = require( 'inquirer' );
 
 module.exports = function( grunt ) {
-
 	var path = require( 'path' );
 	var util = require( './lib/util' ).init( grunt );
 	var exec = require( 'child_process' ).exec, child;
