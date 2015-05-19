@@ -189,7 +189,6 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnAssets = function( commitMessage ) {
-				var svnAssetsDir = svnTmpDir + '/assets';
 
 				inquirer.prompt([
 					{
