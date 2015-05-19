@@ -67,7 +67,20 @@ module.exports = function( grunt ) {
 				return true;
 			}
 		}], function( answers ) {
-			var svnTmpDir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
+			var svnUser = options.svn_username || answers.svn_username;
+			var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
+
+			// Set subversion directory
+			var svnTmpDir    = path.resolve( path.join( 'tmp', options.plugin_slug ) );
+			var svnTagsDir   = path.join( svnTmpDir, 'tags', pluginVersion[1] );
+			var svnTrunkDir  = path.join( svnTmpDir, 'trunk' );
+			var svnAssetsDir = path.join( svnTmpDir, 'assets' );
+
+			// Delete plug-in tmp directory
+			if ( grunt.file.isDir( svnTmpDir ) ) {
+				grunt.file.delete( svnTmpDir, { force: true } );
+				grunt.verbose.ok( 'Deleted plug-in: ' + svnTmpDir.cyan );
+			}
 
 			/**
 			 * Subversion Arguments.
