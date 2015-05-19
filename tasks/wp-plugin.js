@@ -118,7 +118,7 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnUpdate = function() {
-				var svnTagsDir  = svnTmpDir + '/tags/' + getVersion();
+				var svnTagsDir  = svnTmpDir + '/tags/' + pluginVersion[1];
 				var svnTrunkDir = svnTmpDir + '/trunk';
 
 				// Subversion update
@@ -174,7 +174,7 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnCommit = function() {
-				var commitMessage = 'Release ' + getVersion() + ', see readme.txt for changelog.';
+				var commitMessage = 'Release ' + pluginVersion[1] + ', see readme.txt for changelog.';
 
 				grunt.log.writeln( 'Subversion commit...' );
 
