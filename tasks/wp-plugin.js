@@ -35,15 +35,15 @@ module.exports = function( grunt ) {
 		inquirer.prompt([{
 			type: 'input',
 			name: 'svn_username',
-			message: 'What\'s your SVN Username?',
+			message: 'Please enter your svn username',
 			when: function() {
 				if ( ! options.svn_username ) {
 					return true;
 				}
 			},
-			validate: function( answer ) {
-				if ( answer.length < 1 ) {
-					return 'Username can\'t be empty, stupid.';
+			validate: function( answers ) {
+				if ( answers.length < 1 ) {
+					return 'Username cannot be empty, stupid.';
 				}
 				return true;
 			}
