@@ -256,22 +256,6 @@ module.exports = function( grunt ) {
 					grunt.log.ok( message );
 				});
 			};
-
-			/**
-			 * Subversion Update or Checkout Logic.
-			 * @return {null}
-			 */
-			grunt.log.writeln( 'Check if Subversion dir exists...' );
-
-			if ( grunt.file.isDir( svnTmpDir ) ) {
-				grunt.log.ok( 'Subversion dir exists.' );
-
-				svnUpdate();
-			} else {
-				grunt.log.ok( 'Subversion dir doesn\'t exists.' );
-
-				svnCheckout();
-			}
 		});
 	});
 };
