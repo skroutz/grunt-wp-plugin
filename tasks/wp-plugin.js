@@ -2,7 +2,7 @@
  * grunt-wp-plugin
  * https://github.com/axisthemes/grunt-wp-plugin
  *
- * Copyright (c) 2014 AxisThemes
+ * Copyright (c) 2015 AxisThemes
  * Licensed under the MIT license.
  */
 
@@ -11,8 +11,8 @@
 var inquirer = require( 'inquirer' );
 
 module.exports = function( grunt ) {
-
 	var path = require( 'path' );
+	var util = require( './lib/util' ).init( grunt );
 	var exec = require( 'child_process' ).exec, child;
 
 	grunt.registerMultiTask( 'wp_plugin', 'Deploy the WordPress plug-in to SVN repository.', function() {
@@ -26,10 +26,29 @@ module.exports = function( grunt ) {
 			svn_repository: 'http://plugins.svn.wordpress.org/{plugin-slug}'
 		});
 
-		if ( ! options.deploy_dir ) {
+		var deployDir  = path.resolve( options.deploy_dir );
+		var readmeFile = path.join( deployDir, 'readme.txt' );
+		var pluginFile = path.join( deployDir, options.plugin_slug + '.php' );
+
+		// Get plug-in versions
+		var readmeVersion = grunt.file.read( readmeFile ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
+		var pluginVersion = grunt.file.read( pluginFile ).match( new RegExp( '[^\t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
+
+		// Check before processing
+		if ( ! options.plugin_slug ) {
+			grunt.fail.fatal( 'Plug-in must have a slug, stupid.' );
+		} else if ( ! grunt.file.isDir( deployDir ) ) {
 			grunt.fail.fatal( 'Plug-in deploy directory not found.' );
-		} else if ( ! options.plugin_slug ) {
-			grunt.fail.fatal( 'Every plug-in must have a slug, fool.' );
+		} else if ( ! grunt.file.exists( readmeFile ) ) {
+			grunt.fail.fatal( 'Plug-in file "readme.txt" is missing.' );
+		} else if ( ! grunt.file.exists( pluginFile ) ) {
+			grunt.fail.fatal( 'Plug-in file "' + options.plugin_slug + '.php" is missing.' );
+		} else if ( util.versionCompare( pluginVersion[1], readmeVersion[1] ) ) {
+			grunt.verbose.ok( 'Plugin version: ' + pluginVersion[1].cyan );
+			grunt.verbose.ok( 'Readme version: ' + readmeVersion[1].cyan );
+			grunt.fail.fatal( 'Plugin and Readme versions do not match.' );
+		} else {
+			grunt.verbose.ok( 'Plug-in is valid for processing...' );
 		}
 
 		inquirer.prompt([{
@@ -43,12 +62,11 @@ module.exports = function( grunt ) {
 			},
 			validate: function( answers ) {
 				if ( answers.length < 1 ) {
-					return 'Username cannot be empty, stupid.';
+					return 'Username cannot be empty, fool.';
 				}
 				return true;
 			}
 		}], function( answers ) {
-			var deployDir = path.resolve( options.deploy_dir );
 			var svnTmpDir = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 
 			/**
@@ -224,67 +242,6 @@ module.exports = function( grunt ) {
 
 					grunt.log.ok( message );
 				});
-			};
-
-			/**
-			 * Get Plug-in Release Version.
-			 * @return {string} version
-			 */
-			var getVersion = function() {
-				var readme_file = path.join( deployDir, 'readme.txt' );
-				var plugin_file = path.join( deployDir, options.plugin_slug + '.php' );
-
-				// Check if Readme and Plug-in file exists
-				if ( ! grunt.file.exists( readme_file ) ) {
-					grunt.fail.warn( 'Readme file "' + readme_file + '" not found.' );
-				} else if ( ! grunt.file.exists( plugin_file ) ) {
-					grunt.fail.warn( 'Plug-in file "' + plugin_file + '" not found.' );
-				}
-
-				// Get Versions
-				var readme_version = grunt.file.read( readme_file ).match( new RegExp( '^Stable tag:\\s*(\\S+)', 'im' ) );
-				var plugin_version = grunt.file.read( plugin_file ).match( new RegExp( '^[ \t\/*#@]*Version:\\s*(\\S+)$', 'im' ) );
-
-				// Compare Versions
-				if ( versionCompare( readme_version[1], plugin_version[1] ) ) {
-					grunt.log.warn( 'Readme version: ' + ( 'v' + readme_version[1] ).cyan );
-					grunt.log.warn( 'Plugin version: ' + ( 'v' + plugin_version[1] ).cyan );
-					grunt.fail.warn( 'Main Readme and Plugin file versions do not match.' );
-				}
-
-				return plugin_version[1];
-			};
-
-			/**
-			 * Simply compares Readme and Plug-in file version.
-			 *
-			 * Returns:
-			 * -1 = readme is LOWER than plugin
-			 *  0 = they are equal
-			 *  1 = readme is GREATER = plugin is LOWER
-			 *  And FALSE if one of input versions are not valid
-			 *
-			 * @param  {string} readme Readme Stable Tag
-			 * @param  {string} plugin Main Plug-in Version
-			 * @return {integer|boolean}
-			 */
-			var versionCompare = function( readme, plugin ) {
-				if ( typeof readme + typeof plugin !== 'stringstring' ) {
-					return false;
-				}
-
-				var a = readme.split( '.' );
-				var b = plugin.split( '.' );
-
-				for ( var i = 0; i < Math.max( a.length, b.length ); i++ ) {
-					if ( ( a[i] && ! b[i] && parseInt( a[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) > parseInt( b[i], 10 ) ) ) {
-						return 1;
-					} else if ( ( b[i] && ! a[i] && parseInt( b[i], 10 ) > 0 ) || ( parseInt( a[i], 10 ) < parseInt( b[i], 10 ) ) ) {
-						return -1;
-					}
-				}
-
-				return 0;
 			};
 
 			/**
