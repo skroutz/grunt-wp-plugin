@@ -100,12 +100,9 @@ module.exports = function( grunt ) {
 
 					// Check plug-in assets
 					if ( grunt.file.isDir( assetsDir ) ) {
-						grunt.log.writeln( 'Copying plug-in assets...' );
-
-						// Delete assets
 						if ( grunt.file.isDir( svnAssetsDir ) ) {
 							grunt.file.delete( svnAssetsDir, { force: true } );
-							grunt.log.ok( 'Deleted assets: ' + svnAssetsDir.cyan );
+							grunt.log.ok( 'Deleted: ' + svnAssetsDir.cyan );
 						}
 
 						// Copy plug-in assets
@@ -117,11 +114,10 @@ module.exports = function( grunt ) {
 					// Delete trunk
 					if ( grunt.file.isDir( svnTrunkDir ) ) {
 						grunt.file.delete( svnTrunkDir, { force: true } );
-						grunt.log.ok( 'Deleted trunk: ' + svnTrunkDir.cyan );
+						grunt.log.ok( 'Deleted: ' + svnTrunkDir.cyan );
 					}
 
 					// Copy deploy to trunk
-					grunt.log.writeln( 'Copying deploy to trunk...' );
 					grunt.util.spawn( { cmd: 'cp', args: [ '-R', deployDir, svnTrunkDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
 						grunt.log.ok( 'Copied: ' + deployDir.cyan + ' -> ' + svnTrunkDir.cyan );
 
