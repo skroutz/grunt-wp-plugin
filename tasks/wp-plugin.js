@@ -26,6 +26,7 @@ module.exports = function( grunt ) {
 			svn_repository: 'http://plugins.svn.wordpress.org/{plugin-slug}'
 		});
 
+		var assetsDir  = path.resolve( options.assets_dir );
 		var deployDir  = path.resolve( options.deploy_dir );
 		var readmeFile = path.join( deployDir, 'readme.txt' );
 		var pluginFile = path.join( deployDir, options.plugin_slug + '.php' );
@@ -95,6 +96,22 @@ module.exports = function( grunt ) {
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
 					if ( error ) {
 						grunt.fail.fatal( 'Subversion update unsuccessful.' );
+					}
+
+					// Check plug-in assets
+					if ( grunt.file.isDir( assetsDir ) ) {
+						grunt.log.writeln( 'Copying plug-in assets...' );
+
+						// Delete assets
+						if ( grunt.file.isDir( svnAssetsDir ) ) {
+							grunt.file.delete( svnAssetsDir, { force: true } );
+							grunt.log.ok( 'Deleted assets: ' + svnAssetsDir.cyan );
+						}
+
+						// Copy plug-in assets
+						grunt.util.spawn( { cmd: 'cp', args: [ '-R', assetsDir, svnAssetsDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
+							grunt.log.ok( 'Copied: ' + assetsDir.cyan + ' -> ' + svnAssetsDir.cyan );
+						});
 					}
 
 					// Delete trunk
@@ -242,6 +259,7 @@ module.exports = function( grunt ) {
 			} else {
 				var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
 
+				// Plug-in checkout
 				grunt.log.ok( 'Subversion checkout: ' + svnRepo.cyan );
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svnRepo, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
 					if ( error ) {
