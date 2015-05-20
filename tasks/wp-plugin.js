@@ -51,7 +51,6 @@ module.exports = function( grunt ) {
 			grunt.verbose.ok( 'Plug-in is valid for processing...' );
 		}
 
-		// Process task :)
 		inquirer.prompt([{
 			type: 'input',
 			name: 'svn_username',
