@@ -95,11 +95,14 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnCheckout = function() {
-				grunt.log.writeln( 'Subversion checkout: ' + svnRepo.cyan );
+				grunt.log.ok( 'Subversion checkout: ' + svnRepo.cyan );
 
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svnRepo, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
-					grunt.log.ok( 'Subversion checkout done.' );
+					if ( error ) {
+						grunt.fail.fatal( 'Subversion checkout unsuccessful.' );
+					}
 
+					// Update
 					svnUpdate();
 				});
 			};
@@ -109,9 +112,7 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnUpdate = function() {
-
-				// Subversion update
-				grunt.log.writeln( 'Subversion update...' );
+				grunt.log.ok( 'Subversion update: ' + svnRepo.cyan );
 
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
 					grunt.log.ok( 'Subversion update done.' );
