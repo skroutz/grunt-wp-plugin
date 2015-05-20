@@ -120,7 +120,8 @@ module.exports = function( grunt ) {
 
 								// Subversion tag
 								if ( grunt.file.isDir( svnTagsDir ) ) {
-									grunt.fail.fatal( 'Tag ' + pluginVersion[1] +' already exists.' );
+									grunt.log.warn( 'Tag ' + pluginVersion[1] +' already exists.' );
+									svnCommit();
 								} else {
 									grunt.log.writeln( 'Copying to tag...' );
 									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
