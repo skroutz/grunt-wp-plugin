@@ -77,22 +77,14 @@ module.exports = function( grunt ) {
 			var svnTrunkDir  = path.join( svnTmpDir, 'trunk' );
 			var svnAssetsDir = path.join( svnTmpDir, 'assets' );
 
-			// Delete plug-in tmp directory
-			if ( grunt.file.isDir( svnTmpDir ) ) {
-				grunt.file.delete( svnTmpDir, { force: true } );
-				grunt.verbose.ok( 'Deleted plug-in: ' + svnTmpDir.cyan );
-			}
-
 			/**
 			 * Subversion Arguments.
 			 * @param  {array} args
 			 * @return {array} args
 			 */
 			var svnArgs = function( args ) {
-				var svn_username = options.svn_username || answers.svn_username;
-				if ( svn_username ) {
-					args.push( '--username' );
-					args.push( svn_username );
+				if ( svnUser ) {
+					args.push( '--username', svnUser );
 				}
 
 				return args;
@@ -103,11 +95,9 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnCheckout = function() {
-				var svn_repository = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
+				grunt.log.writeln( 'Subversion checkout: ' + svnRepo.cyan );
 
-				grunt.log.writeln( 'Subversion checkout: ' + svn_repository.cyan );
-
-				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svn_repository, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svnRepo, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
 					grunt.log.ok( 'Subversion checkout done.' );
 
 					svnUpdate();
