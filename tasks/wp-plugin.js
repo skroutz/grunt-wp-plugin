@@ -96,7 +96,6 @@ module.exports = function( grunt ) {
 			 */
 			var svnCheckout = function() {
 				grunt.log.ok( 'Subversion checkout: ' + svnRepo.cyan );
-
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svnRepo, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
 					if ( error ) {
 						grunt.fail.fatal( 'Subversion checkout unsuccessful.' );
@@ -113,43 +112,39 @@ module.exports = function( grunt ) {
 			 */
 			var svnUpdate = function() {
 				grunt.log.ok( 'Subversion update: ' + svnRepo.cyan );
-
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
-					grunt.log.ok( 'Subversion update done.' );
+					if ( error ) {
+						grunt.fail.fatal( 'Subversion update unsuccessful.' );
+					}
 
 					// Delete trunk
-					grunt.file.delete( svnTrunkDir );
-					grunt.log.ok( 'Subversion trunk deleted.' );
+					if ( grunt.file.isDir( svnTrunkDir ) ) {
+						grunt.file.delete( svnTrunkDir, { force: true } );
+						grunt.log.ok( 'Deleted trunk: ' + svnTrunkDir.cyan );
+					}
 
 					// Copy deploy to trunk
 					grunt.log.writeln( 'Copying deploy to trunk...' );
-
 					grunt.util.spawn( { cmd: 'cp', args: [ '-R', deployDir, svnTrunkDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
 						grunt.log.ok( 'Copied: ' + deployDir.cyan + ' -> ' + svnTrunkDir.cyan );
 
 						// Subversion add
 						grunt.log.writeln( 'Subversion add...' );
-
 						grunt.util.spawn( { cmd: 'svn', args: [ 'add', '.', '--force', '--auto-props', '--parents', '--depth', 'infinity' ], opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
 							grunt.log.ok( 'Subversion add done.' );
 
 							// Subversion remove
 							grunt.log.writeln( 'Subversion remove...' );
-
 							child = exec( "svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )", { cwd: svnTmpDir }, function() {
 								grunt.log.ok( 'Subversion remove done.' );
 
 								// Subversion tag
-								grunt.log.writeln( 'Check if Subversion tag dir exists...' );
-
 								if ( grunt.file.isDir( svnTagsDir ) ) {
-									grunt.fail.fatal( 'Subversion tag already exists.' );
+									grunt.fail.fatal( 'Tag ' + pluginVersion[1] +' already exists.' );
 								} else {
-									grunt.log.writeln( 'Subversion tag...' );
-
+									grunt.log.writeln( 'Copying to tag...' );
 									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
-										grunt.log.ok( 'Subversion tag done.' );
-
+										grunt.log.ok( 'Copied to tag.' );
 										svnCommit();
 									});
 								}
@@ -167,10 +162,8 @@ module.exports = function( grunt ) {
 				var commitMessage = 'Release ' + pluginVersion[1] + ', see readme.txt for changelog.';
 
 				grunt.log.writeln( 'Subversion commit...' );
-
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commitMessage ] ), opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
 					grunt.log.ok( commitMessage );
-
 					done();
 				});
 			};
