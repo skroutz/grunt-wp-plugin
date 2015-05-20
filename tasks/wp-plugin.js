@@ -254,6 +254,16 @@ module.exports = function( grunt ) {
 					grunt.log.ok( message );
 				});
 			};
+
+			/**
+			 * Plug-in Workflow.
+			 * @return {null}
+			 */
+			if ( grunt.file.isDir( svnTmpDir ) ) {
+				svnUpdate();
+			} else {
+				svnCheckout();
+			}
 		});
 	});
 };
