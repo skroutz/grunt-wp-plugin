@@ -141,10 +141,23 @@ module.exports = function( grunt ) {
 			var svnCommit = function() {
 				var commitMessage = 'Release ' + pluginVersion[1] + ', see readme.txt for changelog.';
 
-				grunt.log.writeln( 'Subversion commit...' );
-				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commitMessage ] ), opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
-					grunt.log.ok( commitMessage );
-					done();
+				// Ask for confirm?
+				inquirer.prompt([{
+					type: 'confirm',
+					name: 'release',
+					message: 'Are you sure you want plug-in version released?',
+					default: false
+				}], function( answers ) {
+					if ( ! answers.release ) {
+						grunt.log.warn( 'Aborting, Plug-in version release...' );
+						return;
+					}
+
+					grunt.log.writeln( 'Subversion commit...' );
+					grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'ci', '-m', commitMessage ] ), opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
+						grunt.log.ok( commitMessage );
+						done();
+					});
 				});
 			};
 
@@ -158,8 +171,8 @@ module.exports = function( grunt ) {
 				inquirer.prompt([
 					{
 						type: 'confirm',
-						name: 'update_assets',
-						message: 'Are you sure you want to update plug-in assets?',
+						name: 'updated',
+						message: 'Are you sure you want plug-in assets updated?',
 						default: true,
 						when: function() {
 							if ( ! commitMessage ) {
@@ -173,7 +186,7 @@ module.exports = function( grunt ) {
 						message: 'What commit message do you need?',
 						choices: [ 'Custom', 'Default' ],
 						when: function( answers ) {
-							return answers.update_assets;
+							return answers.updated;
 						},
 						filter: function( val ) {
 							return val.toLowerCase();
@@ -208,10 +221,10 @@ module.exports = function( grunt ) {
 
 					if ( commitMessage ) {
 						message = commitMessage;
-					} else if ( answers.update_assets ) {
+					} else if ( answers.updated ) {
 						message = ( answers.commit !== 'custom' ) ? answers.commit_list : answers.commit_message;
 					} else {
-						grunt.log.warn( 'Aborting Plug-in assets update...' );
+						grunt.log.warn( 'Aborting, Plug-in assets update...' );
 						return;
 					}
 
