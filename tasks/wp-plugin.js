@@ -250,12 +250,30 @@ module.exports = function( grunt ) {
 				});
 			};
 
+			var svnStatus = function() {
+				child = exec( "svn status | sed -e '/^!/!d' -e 's/^!//'", { cwd: svnTmpDir }, function( error, stdout, stderr ) {
+					if ( stdout !== '' ) {
+						return true;
+					} else {
+						return false;
+					}
+				});
+			};
+
 			/**
 			 * Plug-in Release.
 			 * @return {null}
 			 */
 			if ( grunt.file.isDir( svnTmpDir ) ) {
-				svnUpdate();
+				// svnUpdate();
+
+				if ( svnStatus() ) {
+					grunt.log.ok( 'Changed...' );
+				} else {
+					grunt.log.ok( 'Unchanged...' );
+				}
+
+
 			} else {
 				var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
 
