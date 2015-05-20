@@ -68,9 +68,6 @@ module.exports = function( grunt ) {
 				return true;
 			}
 		}], function( answers ) {
-			var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
-
-			// Set subversion directory
 			var svnTmpDir    = path.resolve( path.join( 'tmp', options.plugin_slug ) );
 			var svnTagsDir   = path.join( svnTmpDir, 'tags', pluginVersion[1] );
 			var svnTrunkDir  = path.join( svnTmpDir, 'trunk' );
@@ -95,13 +92,14 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnCheckout = function() {
+				var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
+
 				grunt.log.ok( 'Subversion checkout: ' + svnRepo.cyan );
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svnRepo, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
 					if ( error ) {
 						grunt.fail.fatal( 'Subversion checkout unsuccessful.' );
 					}
 
-					// Update
 					svnUpdate();
 				});
 			};
@@ -111,7 +109,7 @@ module.exports = function( grunt ) {
 			 * @return {null}
 			 */
 			var svnUpdate = function() {
-				grunt.log.ok( 'Subversion update: ' + svnRepo.cyan );
+				grunt.log.ok( 'Subversion update...' );
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
 					if ( error ) {
 						grunt.fail.fatal( 'Subversion update unsuccessful.' );
