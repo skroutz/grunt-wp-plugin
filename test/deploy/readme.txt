@@ -1,2 +1,2 @@
 === WP Plug-in Test ===
-Stable tag: 0.1.1
+Stable tag: 0.1.2
