@@ -256,7 +256,7 @@ module.exports = function( grunt ) {
 			};
 
 			/**
-			 * Plug-in Workflow.
+			 * Plug-in Release.
 			 * @return {null}
 			 */
 			if ( grunt.file.isDir( svnTmpDir ) ) {
