@@ -68,7 +68,6 @@ module.exports = function( grunt ) {
 				return true;
 			}
 		}], function( answers ) {
-			var svnUser = options.svn_username || answers.svn_username;
 			var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
 
 			// Set subversion directory
@@ -83,6 +82,7 @@ module.exports = function( grunt ) {
 			 * @return {array} args
 			 */
 			var svnArgs = function( args ) {
+				var svnUser = options.svn_username || answers.svn_username;
 				if ( svnUser ) {
 					args.push( '--username', svnUser );
 				}
