@@ -8,10 +8,12 @@
 
 'use strict';
 
+var cpy      = require( 'cpy' );
+var del      = require( 'del' );
 var inquirer = require( 'inquirer' );
 
 module.exports = function( grunt ) {
-	var copy = require( 'cpy' );
+
 	var path = require( 'path' );
 	var util = require( './lib/util' ).init( grunt );
 	var exec = require( 'child_process' ).exec, child;
@@ -109,7 +111,7 @@ module.exports = function( grunt ) {
 							grunt.log.warn( 'Delete: ' + svnAssetsDir.cyan );
 						}
 
-						copy([
+						cpy([
 							'icon.svg',
 							'icon-*.{png,jpg}',
 							'banner-*.{png,jpg}',
