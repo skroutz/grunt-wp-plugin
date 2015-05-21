@@ -110,11 +110,11 @@ module.exports = function( grunt ) {
 						}
 
 						copy([
-							assetsDir + '/icon.svg',
-							assetsDir + '/icon-*.{png,jpg}',
-							assetsDir + '/banner-*.{png,jpg}',
-							assetsDir + '/screenshot-*.{png,jpg}'
-						], svnAssetsDir, function( err ) {
+							'icon.svg',
+							'icon-*.{png,jpg}',
+							'banner-*.{png,jpg}',
+							'screenshot-*.{png,jpg}'
+						], svnAssetsDir, { cwd: assetsDir }, function( err ) {
 							grunt.log.ok( 'Copied: ' + assetsDir.cyan + ' -> ' + svnAssetsDir.cyan );
 						});
 					}
