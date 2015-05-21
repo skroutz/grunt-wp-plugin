@@ -32,6 +32,7 @@ module.exports = function( grunt ) {
 		// Configuration to be run (and then tested).
 		wp_plugin: {
 			options: {
+				svn_username: 'shivapoudel',
 				svn_repository: 'https://svn.riouxsvn.com/{plugin-slug}'
 			},
 			deploy: {

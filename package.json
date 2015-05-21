@@ -29,6 +29,7 @@
     "test": "grunt test"
   },
   "dependencies": {
+    "cpy": "^3.1.0",
     "inquirer": "^0.8.4"
   },
   "devDependencies": {

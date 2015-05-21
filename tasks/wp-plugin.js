@@ -11,6 +11,7 @@
 var inquirer = require( 'inquirer' );
 
 module.exports = function( grunt ) {
+	var copy = require( 'cpy' );
 	var path = require( 'path' );
 	var util = require( './lib/util' ).init( grunt );
 	var exec = require( 'child_process' ).exec, child;
@@ -98,15 +99,22 @@ module.exports = function( grunt ) {
 						grunt.fail.fatal( 'Subversion update unsuccessful.' );
 					}
 
-					// Check plug-in assets
+					// Copy plug-in assets
 					if ( grunt.file.isDir( assetsDir ) ) {
+						grunt.log.writeln( 'Copying Plug-in assets...' );
+
+						// Delete assets
 						if ( grunt.file.isDir( svnAssetsDir ) ) {
 							grunt.file.delete( svnAssetsDir, { force: true } );
-							grunt.log.ok( 'Deleted: ' + svnAssetsDir.cyan );
+							grunt.log.warn( 'Delete: ' + svnAssetsDir.cyan );
 						}
 
-						// Copy plug-in assets
-						grunt.util.spawn( { cmd: 'cp', args: [ '-R', assetsDir, svnAssetsDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
+						copy([
+							assetsDir + '/icon.svg',
+							assetsDir + '/icon-*.{png,jpg}',
+							assetsDir + '/banner-*.{png,jpg}',
+							assetsDir + '/screenshot-*.{png,jpg}'
+						], svnAssetsDir, function( err ) {
 							grunt.log.ok( 'Copied: ' + assetsDir.cyan + ' -> ' + svnAssetsDir.cyan );
 						});
 					}
@@ -118,6 +126,7 @@ module.exports = function( grunt ) {
 					}
 
 					// Copy deploy to trunk
+					grunt.log.ok( 'Copying deploy to trunk...' );
 					grunt.util.spawn( { cmd: 'cp', args: [ '-R', deployDir, svnTrunkDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
 						grunt.log.ok( 'Copied: ' + deployDir.cyan + ' -> ' + svnTrunkDir.cyan );
 
