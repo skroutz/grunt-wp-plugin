@@ -91,51 +91,43 @@ module.exports = function( grunt ) {
 			};
 
 			/**
-			 * Subversion Update.
+			 * Copy Plug-in.
 			 * @return {null}
 			 */
-			var svnUpdate = function() {
-				grunt.log.ok( 'Subversion update...' );
-				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
-					if ( error ) {
-						grunt.fail.fatal( 'Subversion update unsuccessful.' );
-					}
+			var copyPlugin = function() {
+				if ( grunt.file.isDir( svnTagsDir ) ) {
+					grunt.fail.fatal( 'Tag ' + pluginVersion[1] +' already exists.' );
+				} else {
+					grunt.log.writeln( 'Copying Plug-in to trunk...' );
 
-					// Copy plug-in and its assets
-					if ( grunt.file.isDir( svnTagsDir ) ) {
-						grunt.fail.fatal( 'Tag ' + pluginVersion[1] +' already exists.' );
-					} else {
-						grunt.log.writeln( 'Copying Plug-in to trunk...' );
+					del(['**'], { cwd: svnTrunkDir }, function( err ) {
+						grunt.log.warn( 'Plug-in trunk deleted.' );
 
-						del(['**'], { cwd: svnTrunkDir }, function( err ) {
-							grunt.log.warn( 'Plug-in trunk deleted.' );
+						cpy(['**'], svnTrunkDir, { cwd: deployDir }, function( err ) {
+							grunt.log.ok( 'Plug-in from deploy -> trunk copied.' );
 
-							cpy(['**'], svnTrunkDir, { cwd: deployDir }, function( err ) {
-								grunt.log.ok( 'Plug-in from deploy -> trunk copied.' );
+							if ( grunt.file.isDir( assetsDir ) ) {
+								grunt.log.writeln( 'Processing Plug-in assets...' );
 
-								if ( grunt.file.isDir( assetsDir ) ) {
-									grunt.log.writeln( 'Processing Plug-in assets...' );
+								del(['*.{svg,png,jpg,gif}'], { cwd: svnAssetsDir }, function( err ) {
+									grunt.log.warn( 'Plug-in assets deleted.' );
 
-									del(['*.{svg,png,jpg,gif}'], { cwd: svnAssetsDir }, function( err ) {
-										grunt.log.warn( 'Plug-in assets deleted.' );
-
-										cpy([
-											'icon.svg',
-											'icon-*.{png,jpg}',
-											'banner-*.{png,jpg}',
-											'screenshot-*.{png,jpg}'
-										], svnAssetsDir, { cwd: assetsDir }, function( err ) {
-											grunt.log.ok( 'Plug-in icons, banners and screenshots copied.' );
-											svnChange();
-										});
+									cpy([
+										'icon.svg',
+										'icon-*.{png,jpg}',
+										'banner-*.{png,jpg}',
+										'screenshot-*.{png,jpg}'
+									], svnAssetsDir, { cwd: assetsDir }, function( err ) {
+										grunt.log.ok( 'Plug-in icons, banners and screenshots copied.' );
+										svnChange();
 									});
-								} else {
-									svnChange();
-								}
-							});
+								});
+							} else {
+								svnChange();
+							}
 						});
-					}
-				});
+					});
+				}
 			};
 
 			/**
@@ -156,10 +148,6 @@ module.exports = function( grunt ) {
 						// Subversion copy
 						grunt.log.writeln( 'Copying to tag...' );
 						grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
-							if ( error ) {
-								grunt.fail.fatal( 'Subversion copy unsuccessful.' );
-							}
-
 							grunt.log.ok( 'Copied to tag.' );
 							svnCommit();
 						});
@@ -195,19 +183,25 @@ module.exports = function( grunt ) {
 			};
 
 			// Plug-in Release Workflow :)
-			if ( grunt.file.isDir( svnTmpDir ) ) {
-				svnUpdate();
-			} else {
-				var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
+			var svnRepo = options.svn_repository.replace( '{plugin-slug}', options.plugin_slug );
 
-				// Plug-in checkout
+			if ( grunt.file.isDir( svnTmpDir ) ) {
+				grunt.log.ok( 'Subversion update: ' + svnRepo.cyan );
+				grunt.util.spawn( { cmd: 'svn', args: svnArgs( ['up'] ), opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
+					if ( error ) {
+						grunt.fail.fatal( 'Subversion update unsuccessful.' );
+					}
+
+					copyPlugin();
+				});
+			} else {
 				grunt.log.ok( 'Subversion checkout: ' + svnRepo.cyan );
 				grunt.util.spawn( { cmd: 'svn', args: svnArgs( [ 'co', svnRepo, svnTmpDir ] ), opts: { stdio: 'inherit' } }, function( error, result, code ) {
 					if ( error ) {
 						grunt.fail.fatal( 'Subversion checkout unsuccessful.' );
 					}
 
-					svnUpdate();
+					copyPlugin();
 				});
 			}
 		});
