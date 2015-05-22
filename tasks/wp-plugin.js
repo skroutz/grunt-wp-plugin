@@ -101,59 +101,67 @@ module.exports = function( grunt ) {
 						grunt.fail.fatal( 'Subversion update unsuccessful.' );
 					}
 
-					// Copy plug-in assets
-					if ( grunt.file.isDir( assetsDir ) ) {
-						grunt.log.writeln( 'Copying Plug-in assets...' );
+					// Copy plug-in and its assets
+					if ( grunt.file.isDir( svnTagsDir ) ) {
+						grunt.fail.fatal( 'Tag ' + pluginVersion[1] +' already exists.' );
+					} else {
+						grunt.log.writeln( 'Copying Plug-in to trunk...' );
 
-						// Delete assets
-						if ( grunt.file.isDir( svnAssetsDir ) ) {
-							grunt.file.delete( svnAssetsDir, { force: true } );
-							grunt.log.warn( 'Delete: ' + svnAssetsDir.cyan );
-						}
+						del(['**'], { cwd: svnTrunkDir }, function( err ) {
+							grunt.log.warn( 'Plug-in trunk deleted.' );
 
-						cpy([
-							'icon.svg',
-							'icon-*.{png,jpg}',
-							'banner-*.{png,jpg}',
-							'screenshot-*.{png,jpg}'
-						], svnAssetsDir, { cwd: assetsDir }, function( err ) {
-							grunt.log.ok( 'Copied: ' + assetsDir.cyan + ' -> ' + svnAssetsDir.cyan );
-						});
-					}
+							cpy(['**'], svnTrunkDir, { cwd: deployDir }, function( err ) {
+								grunt.log.ok( 'Plug-in from deploy -> trunk copied.' );
 
-					// Delete trunk
-					if ( grunt.file.isDir( svnTrunkDir ) ) {
-						grunt.file.delete( svnTrunkDir, { force: true } );
-						grunt.log.ok( 'Deleted: ' + svnTrunkDir.cyan );
-					}
+								if ( grunt.file.isDir( assetsDir ) ) {
+									grunt.log.writeln( 'Processing Plug-in assets...' );
 
-					// Copy deploy to trunk
-					grunt.log.ok( 'Copying deploy to trunk...' );
-					grunt.util.spawn( { cmd: 'cp', args: [ '-R', deployDir, svnTrunkDir ], opts: { stdio: 'inherit' } }, function( error, result, code ) {
-						grunt.log.ok( 'Copied: ' + deployDir.cyan + ' -> ' + svnTrunkDir.cyan );
+									del(['*.{svg,png,jpg,gif}'], { cwd: svnAssetsDir }, function( err ) {
+										grunt.log.warn( 'Plug-in assets deleted.' );
 
-						// Subversion add
-						grunt.log.writeln( 'Subversion add...' );
-						grunt.util.spawn( { cmd: 'svn', args: [ 'add', '.', '--force', '--auto-props', '--parents', '--depth', 'infinity' ], opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
-							grunt.log.ok( 'Subversion add done.' );
-
-							// Subversion remove
-							grunt.log.writeln( 'Subversion remove...' );
-							child = exec( "svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )", { cwd: svnTmpDir }, function() {
-								grunt.log.ok( 'Subversion remove done.' );
-
-								// Subversion tag
-								if ( grunt.file.isDir( svnTagsDir ) ) {
-									grunt.log.warn( 'Tag ' + pluginVersion[1] +' already exists.' );
-									svnCommit();
-								} else {
-									grunt.log.writeln( 'Copying to tag...' );
-									grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
-										grunt.log.ok( 'Copied to tag.' );
-										svnCommit();
+										cpy([
+											'icon.svg',
+											'icon-*.{png,jpg}',
+											'banner-*.{png,jpg}',
+											'screenshot-*.{png,jpg}'
+										], svnAssetsDir, { cwd: assetsDir }, function( err ) {
+											grunt.log.ok( 'Plug-in icons, banners and screenshots copied.' );
+											svnChange();
+										});
 									});
+								} else {
+									svnChange();
 								}
 							});
+						});
+					}
+				});
+			};
+
+			/**
+			 * Subversion Change.
+			 * @return {null}
+			 */
+			var svnChange = function() {
+				// Subversion add
+				grunt.log.writeln( 'Subversion add...' );
+				grunt.util.spawn( { cmd: 'svn', args: [ 'add', '.', '--force', '--auto-props', '--parents', '--depth', 'infinity' ], opts: { stdio: 'inherit', cwd: svnTmpDir } }, function( error, result, code ) {
+					grunt.log.ok( 'Subversion add done.' );
+
+					// Subversion remove
+					grunt.log.writeln( 'Subversion remove...' );
+					child = exec( "svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )", { cwd: svnTmpDir }, function() {
+						grunt.log.ok( 'Subversion remove done.' );
+
+						// Subversion copy
+						grunt.log.writeln( 'Copying to tag...' );
+						grunt.util.spawn( { cmd: 'svn', args: [ 'copy', svnTrunkDir, svnTagsDir ], opts: { stdio: 'inherit', cwd: svnTmpDir } },  function( error, result, code ) {
+							if ( error ) {
+								grunt.fail.fatal( 'Subversion copy unsuccessful.' );
+							}
+
+							grunt.log.ok( 'Copied to tag.' );
+							svnCommit();
 						});
 					});
 				});
